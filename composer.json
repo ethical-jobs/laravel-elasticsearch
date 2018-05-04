@@ -1,0 +1,54 @@
+{
+    "name": "ethical-jobs/laravel-elasticsearch",
+    "type": "library",
+    "description": "Laravel elasticsearch",
+    "homepage": "https://github.com/ethical-jobs/laravel-elasticsearch",
+    "keywords": ["ethicaljobs", "elasticsearch", "laravel"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "EthicalJobs.com.au",
+            "homepage": "http://ethicaljobs.com.au"
+        },
+        {
+            "name": "Andrew McLagan",
+            "email": "andrew@ethicaljobs.com.au"
+        }
+    ],
+    "require": {
+        "php": ">=7.1",
+        "m6web/elasticsearch-mock": "^5.0",
+        "ongr/elasticsearch-dsl": "^5.0",
+        "elasticsearch/elasticsearch": "^5.3",
+        "ethical-jobs/laravel-foundation": ">=1.0 <2.0",
+        "maknz/slack": "^1.7"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~6.5",
+        "mockery/mockery": "1.0.*",
+        "codedungeon/phpunit-result-printer": "^0.5.3",
+        "orchestra/testbench": "~3.5",
+        "orchestra/database": "~3.5",
+        "hirak/prestissimo": "^0.3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "EthicalJobs\\Elasticsearch\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable" : true,
+    "extra": {
+        "laravel": {
+            "providers": [
+                "EthicalJobs\\Elasticsearch\\ServiceProvider"
+            ],
+            "aliases": {} 
+        }
+    } 
+}
