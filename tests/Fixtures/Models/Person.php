@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Fixtures;
+namespace Tests\Fixtures\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,7 +9,7 @@ use EthicalJobs\Elasticsearch\Document;
 
 class Person extends Model implements Indexable
 {
-    use Document, SoftDeletes;
+    use SoftDeletes, Document;
 
     /**
      * The attributes that are mass assignable.
@@ -19,32 +19,17 @@ class Person extends Model implements Indexable
     protected $fillable = [ 
         'first_name',    
         'last_name',     
+        'age',
         'email',         
     ];    
 
     public function family()
     {
         return $this->belongsTo(Family::class);
-    }    
+    }     
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getDocumentMappings()
-    {
-        return [
-            'family_id'     => ['type' => 'integer'],
-            'first_name'    => ['type' => 'text'],
-            'last_name'     => ['type' => 'text'],
-            'email'         => ['type' => 'text'],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getDocumentRelations()
     {
         return ['family'];
-    }    
+    }      
 }
