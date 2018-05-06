@@ -63,16 +63,16 @@
         },
         {
             "name": "ethical-jobs/laravel-storage",
-            "version": "v1.0.1",
+            "version": "v1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ethical-jobs/laravel-storage.git",
-                "reference": "cd4d2abf9eee2568abcbd9ad00e734cc89e7f17c"
+                "reference": "74a9e8c09a9f9eaaced7c1a1777bf476ff19d023"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ethical-jobs/laravel-storage/zipball/cd4d2abf9eee2568abcbd9ad00e734cc89e7f17c",
-                "reference": "cd4d2abf9eee2568abcbd9ad00e734cc89e7f17c",
+                "url": "https://api.github.com/repos/ethical-jobs/laravel-storage/zipball/74a9e8c09a9f9eaaced7c1a1777bf476ff19d023",
+                "reference": "74a9e8c09a9f9eaaced7c1a1777bf476ff19d023",
                 "shasum": ""
             },
             "require": {
@@ -113,7 +113,7 @@
                 "repositories",
                 "storage"
             ],
-            "time": "2018-05-04T07:41:27+00:00"
+            "time": "2018-05-06T03:23:24+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
