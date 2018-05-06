@@ -1,3 +1,7 @@
+# v1.6.1
+
+- Lock file updates for dependancies
+
 # v1.6.0
 
 - Refactoring test helpers
