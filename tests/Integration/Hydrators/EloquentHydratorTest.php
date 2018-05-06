@@ -5,7 +5,7 @@ namespace Tests\Integration\Hydrators;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Fixtures\Models;
-use EthicalJobs\Storage\Hydrators\Elasticsearch\EloquentHydrator;
+use EthicalJobs\Elasticsearch\Hydrators\EloquentHydrator;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
 class EloquentHydratorTest extends \Tests\TestCase

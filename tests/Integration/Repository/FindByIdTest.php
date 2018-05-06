@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Integration\Repositories\Elasticsearch;
+namespace Tests\Integration\Repositories;
 
 use Mockery;
 use Elasticsearch\Client;
-use EthicalJobs\Storage\Testing\RepositoryFactory;
+use Tests\Fixtures\RepositoryFactory;
 use Tests\Fixtures\Models;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
@@ -32,7 +32,7 @@ class FindByIdTest extends \Tests\TestCase
             ->andReturn($searchResults)
             ->getMock();            
 
-        $repository = RepositoryFactory::makeElasticsearch($client, new Models\Person);
+        $repository = RepositoryFactory::make($client, new Models\Person);
 
         $result = $repository->findById($people->first()->id);
 
@@ -56,7 +56,7 @@ class FindByIdTest extends \Tests\TestCase
             ->andReturn($searchResults)
             ->getMock();            
 
-        $repository = RepositoryFactory::makeElasticsearch($client, new Models\Person);
+        $repository = RepositoryFactory::make($client, new Models\Person);
 
         $repository->findByField('first_name', 'Andrew');
     }         

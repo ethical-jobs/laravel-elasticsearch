@@ -7,7 +7,7 @@ use EthicalJobs\Elasticsearch\Indexing\IndexQuery;
 use EthicalJobs\Elasticsearch\Indexing\Logging\Logger;
 use EthicalJobs\Elasticsearch\Indexing\Logging\Channel;
 use EthicalJobs\Elasticsearch\Indexing\Logging\Store;
-use Tests\Fixtures\Person;
+use Tests\Fixtures\Models\Person;
 
 class IndexQueryLoggingTest extends \Tests\TestCase
 {

@@ -2,7 +2,7 @@
 
 namespace Tests\Integration\Indexing\IndexQuery;
 
-use Tests\Fixtures\Person;
+use Tests\Fixtures\Models\Person;
 use EthicalJobs\Elasticsearch\Indexing\IndexQuery;
 
 class IndexQueryTest extends \Tests\TestCase

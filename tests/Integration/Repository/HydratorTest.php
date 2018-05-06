@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests\Integration\Repositories\Elasticsearch;
+namespace Tests\Integration\Repositories;
 
 use Mockery;
 use Elasticsearch\Client;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Model;
-use EthicalJobs\Storage\Testing\RepositoryFactory;
+use Tests\Fixtures\RepositoryFactory;
 use Tests\Fixtures\Models;
-use EthicalJobs\Storage\Hydrators\Elasticsearch as Hydrators;
+use EthicalJobs\Elasticsearch\Hydrators;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
 class HydratorTest extends \Tests\TestCase
@@ -28,7 +28,7 @@ class HydratorTest extends \Tests\TestCase
             ->andReturn(SearchResultsFactory::getSearchResults($people))
             ->getMock();       
 
-        $repository = RepositoryFactory::makeElasticsearch($client, new Models\Person);
+        $repository = RepositoryFactory::make($client, new Models\Person);
 
         $results = $repository
             ->setHydrator(new Hydrators\EloquentHydrator)
@@ -54,7 +54,7 @@ class HydratorTest extends \Tests\TestCase
             ->andReturn(SearchResultsFactory::getSearchResults($people))
             ->getMock();       
 
-        $repository = RepositoryFactory::makeElasticsearch($client, new Models\Person);
+        $repository = RepositoryFactory::make($client, new Models\Person);
 
         $results = $repository
             ->find();
@@ -79,7 +79,7 @@ class HydratorTest extends \Tests\TestCase
             ->andReturn(SearchResultsFactory::getSearchResults($people))
             ->getMock();       
 
-        $repository = RepositoryFactory::makeElasticsearch($client, new Models\Person);
+        $repository = RepositoryFactory::make($client, new Models\Person);
 
         $results = $repository
             ->setHydrator(new Hydrators\ObjectHydrator)

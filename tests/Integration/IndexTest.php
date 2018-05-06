@@ -6,7 +6,7 @@ use Mockery;
 use Elasticsearch\Client;
 use EthicalJobs\Elasticsearch\Index;
 use EthicalJobs\Elasticsearch\Indexable;
-use Tests\Fixtures;
+use Tests\Fixtures\Models;
 
 class IndexTest extends \Tests\TestCase
 {
@@ -47,7 +47,7 @@ class IndexTest extends \Tests\TestCase
     {
         $index = app()->make(Index::class);
 
-        $this->assertTrue($index->isIndexable(new Fixtures\Vehicle));
+        $this->assertTrue($index->isIndexable(new Models\Vehicle));
     }
 
     /**

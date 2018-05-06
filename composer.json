@@ -20,7 +20,7 @@
         "m6web/elasticsearch-mock": "^5.0",
         "ongr/elasticsearch-dsl": "^5.0",
         "elasticsearch/elasticsearch": "^5.3",
-        "ethical-jobs/laravel-foundation": ">=1.0 <2.0",
+        "ethical-jobs/laravel-storage": ">=1.0 <2.0",
         "maknz/slack": "^1.7"
     },
     "require-dev": {

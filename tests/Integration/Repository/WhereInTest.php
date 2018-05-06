@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Integration\Repositories\Elasticsearch;
+namespace Tests\Integration\Repositories;
 
 use Mockery;
 use Elasticsearch\Client;
-use EthicalJobs\Storage\Testing\RepositoryFactory;
+use Tests\Fixtures\RepositoryFactory;
 use Tests\Fixtures\Models;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
@@ -31,7 +31,7 @@ class WhereInTest extends \Tests\TestCase
             ->andReturn(SearchResultsFactory::getSearchResults($people))
             ->getMock();       
 
-        $repository = RepositoryFactory::makeElasticsearch($client, new Models\Person);
+        $repository = RepositoryFactory::make($client, new Models\Person);
 
         $result = $repository
             ->whereIn('age', [34,65,14,21])

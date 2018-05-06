@@ -18,5 +18,15 @@ class Vehicle extends Model implements Indexable
     public function getDocumentRelations()
     {
         return ['family'];
-    }        
+    }  
+
+    public function getDocumentMappings()
+    {
+        return [
+            'family_id' => ['type' => 'integer'],
+            'year'      => ['type' => 'integer'],
+            'model'     => ['type' => 'text'],
+            'make'      => ['type' => 'text'],
+        ];
+    }              
 }

@@ -6,7 +6,7 @@ use Mockery;
 use Elasticsearch\Client;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
 use EthicalJobs\Elasticsearch\Indexing\Logging\Logger;
-use Tests\Fixtures\Person;
+use Tests\Fixtures\Models\Person;
 
 class IndexDocumentTest extends \Tests\TestCase
 {

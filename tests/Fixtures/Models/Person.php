@@ -31,5 +31,15 @@ class Person extends Model implements Indexable
     public function getDocumentRelations()
     {
         return ['family'];
-    }      
+    }  
+
+    public function getDocumentMappings()
+    {
+        return [
+            'first_name'    => ['type' => 'text'],
+            'last_name'     => ['type' => 'text'],
+            'age'           => ['type' => 'integer'],
+            'email'         => ['type' => 'text'],
+        ];
+    }         
 }

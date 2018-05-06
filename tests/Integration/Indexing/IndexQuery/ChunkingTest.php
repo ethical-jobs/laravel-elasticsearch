@@ -2,7 +2,7 @@
 
 namespace Tests\Integration\Indexing\IndexQuery;
 
-use Tests\Fixtures\Person;
+use Tests\Fixtures\Models\Person;
 use EthicalJobs\Elasticsearch\Indexing\IndexQuery;
 
 class ChunkingTest extends \Tests\TestCase
@@ -61,6 +61,7 @@ class ChunkingTest extends \Tests\TestCase
     public function it_captures_every_single_document()
     {
         $expected = factory(Person::class, 339)->create();
+
         $collected = (new Person)->newCollection();
 
         $indexQuery = new IndexQuery(new Person, 50);
@@ -72,7 +73,10 @@ class ChunkingTest extends \Tests\TestCase
         });   
 
         $this->assertEquals(339, $collected->count());
-        $this->assertEquals($expected->modelKeys(), $collected->modelKeys());
+
+        $collected->each(function($person) use($expected) {
+            $expected->has($person->id);
+        });
     }    
 
     /**

@@ -4,7 +4,7 @@ namespace Tests\Integration\Hydrators\Elasticsearch;
 
 use ArrayObject;
 use Tests\Fixtures\Models;
-use EthicalJobs\Storage\Hydrators\Elasticsearch\ObjectHydrator;
+use EthicalJobs\Elasticsearch\Hydrators\ObjectHydrator;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
 class ObjectHydratorTest extends \Tests\TestCase

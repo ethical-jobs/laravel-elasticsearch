@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
 use EthicalJobs\Elasticsearch\Indexing\IndexQuery;
 use EthicalJobs\Elasticsearch\Index;
-use Tests\Fixtures;
+use Tests\Fixtures\Models;
 
 class IndexDocumentsCommandTest extends \Tests\TestCase
 {
@@ -19,9 +19,9 @@ class IndexDocumentsCommandTest extends \Tests\TestCase
      */
     public function it_performs_normal_query_indexing_without_processes_param()
     {
-        factory(Fixtures\Family::class, 50)->create();
-        factory(Fixtures\Person::class, 50)->create();
-        factory(Fixtures\Vehicle::class, 50)->create();
+        factory(Models\Family::class, 50)->create();
+        factory(Models\Person::class, 50)->create();
+        factory(Models\Vehicle::class, 50)->create();
 
         $client = Mockery::mock(Client::class);
 
@@ -48,9 +48,9 @@ class IndexDocumentsCommandTest extends \Tests\TestCase
      */
     public function it_queues_index_queries_when_queue_param_present()
     {
-        factory(Fixtures\Family::class, 50)->create();
-        factory(Fixtures\Person::class, 50)->create();
-        factory(Fixtures\Vehicle::class, 50)->create();
+        factory(Models\Family::class, 50)->create();
+        factory(Models\Person::class, 50)->create();
+        factory(Models\Vehicle::class, 50)->create();
 
         $client = Mockery::mock(Client::class);
 
@@ -78,13 +78,13 @@ class IndexDocumentsCommandTest extends \Tests\TestCase
      */
     public function it_can_specify_indexables_to_index()
     {
-        factory(Fixtures\Family::class, 20)->create();
+        factory(Models\Family::class, 20)->create();
 
         $indexer = Mockery::mock(Indexer::class)
             ->shouldReceive('indexQuery')
             ->once()
             ->withArgs(function ($indexQuery) {
-                $this->assertInstanceOf(\Tests\Fixtures\Family::class, $indexQuery->indexable);
+                $this->assertInstanceOf(Models\Family::class, $indexQuery->indexable);
                 return true;
             })
             ->andReturn(null)
@@ -94,7 +94,7 @@ class IndexDocumentsCommandTest extends \Tests\TestCase
 
         Artisan::call('ej:es:index', [
             '--chunk-size'   => 133,            
-            '--indexables'   => 'Tests\Fixtures\Family',
+            '--indexables'   => Models\Family::class,
         ]);
     }                  
 }

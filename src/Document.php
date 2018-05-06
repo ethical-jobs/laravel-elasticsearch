@@ -5,7 +5,6 @@ namespace EthicalJobs\Elasticsearch;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Builder;
-use EthicalJobs\Foundation\Utils\Timestamp;
 
 /**
  * Indexable trait for eloquent models
@@ -133,7 +132,7 @@ trait Document
         // Convert date params
         foreach ($this->getDates() as $dateField) {
             if (isset($this->$dateField)) {
-                $body[$dateField] = Timestamp::parse($this->$dateField)->toIso8601String();
+                $body[$dateField] = $this->$dateField->toIso8601String();
             }
         }
 

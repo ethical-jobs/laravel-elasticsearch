@@ -23,5 +23,12 @@ class Family extends Model implements Indexable
     public function getDocumentRelations()
     {
         return ['vehicles','members'];
-    }        
+    }     
+
+    public function getDocumentMappings()
+    {
+        return [
+            'surname' => ['type' => 'text'],
+        ];
+    } 
 }

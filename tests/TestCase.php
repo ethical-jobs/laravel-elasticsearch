@@ -4,14 +4,13 @@ namespace Tests;
 
 use Orchestra\Database\ConsoleServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use EthicalJobs\Foundation\Testing\ExtendsAssertions;
 use EthicalJobs\Elasticsearch\ServiceProvider;
 use EthicalJobs\Elasticsearch\Testing\IndexableObservers;
-use Tests\Fixtures;
+use Tests\Fixtures\Models;
 
 abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
-	use ExtendsAssertions, RefreshDatabase;
+	use RefreshDatabase;
 
 	/**
 	 * Setup the test environment.
@@ -40,9 +39,9 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 	    $app['config']->set('elasticsearch.index', 'testing');
 
 	    $app['config']->set('elasticsearch.indexables', [
-	        Fixtures\Person::class,
-	        Fixtures\Family::class,
-	        Fixtures\Vehicle::class,
+	        Models\Person::class,
+	        Models\Family::class,
+	        Models\Vehicle::class,
 	    ]);
 	}	
 

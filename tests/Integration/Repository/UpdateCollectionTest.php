@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Integration\Repositories\Elasticsearch;
+namespace Tests\Integration\Repositories;
 
-use EthicalJobs\Storage\Testing\RepositoryFactory;
+use Tests\Fixtures\RepositoryFactory;
 
 class UpdateCollectionTest extends \Tests\TestCase
 {

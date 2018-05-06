@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Integration\Repositories\Elasticsearch;
+namespace Tests\Integration\Repositories;
 
 use Mockery;
 use Tests\Fixtures\Models;
-use EthicalJobs\Storage\Testing\RepositoryFactory;
+use Tests\Fixtures\RepositoryFactory;
 use Tests\Fixtures\Criteria;
-use EthicalJobs\Storage\Criteria\CriteriaCollection;
+use EthicalJobs\Storage\CriteriaCollection;
 use EthicalJobs\Storage\Repositories\ElasticsearchRepository;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
@@ -18,7 +18,7 @@ class CriteriaTest extends \Tests\TestCase
      */
     public function its_criteria_are_an_empty_collection_by_default()
     {
-        $repository = RepositoryFactory::makeElasticsearch();  
+        $repository = RepositoryFactory::make();  
         
         $criteria = $repository->getCriteriaCollection();
 
@@ -33,7 +33,7 @@ class CriteriaTest extends \Tests\TestCase
      */
     public function it_can_set_and_get_it_criteria_collection()
     {
-        $repository = RepositoryFactory::makeElasticsearch();  
+        $repository = RepositoryFactory::make();  
 
         $collection = new CriteriaCollection([
             Criteria\Males::class,
@@ -51,7 +51,7 @@ class CriteriaTest extends \Tests\TestCase
      */
     public function it_can_add_criteria_items()
     {
-        $repository = RepositoryFactory::makeElasticsearch();  
+        $repository = RepositoryFactory::make();  
         
         $expected = $repository->addCriteria(Criteria\OverFifity::class)
             ->getCriteriaCollection()
@@ -78,7 +78,7 @@ class CriteriaTest extends \Tests\TestCase
             ->andReturn($searchResults)
             ->getMock();
 
-        $repository = RepositoryFactory::makeElasticsearch();  
+        $repository = RepositoryFactory::make();  
         
         $people = $repository
             ->setStorageEngine($client)

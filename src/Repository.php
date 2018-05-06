@@ -9,10 +9,10 @@ use ONGR\ElasticsearchDSL\Sort\FieldSort;
 use ONGR\ElasticsearchDSL\Query\TermLevel;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use EthicalJobs\Storage\Contracts;
-use EthicalJobs\Storage\Criteria\HasCriteria;
-use EthicalJobs\Storage\Criteria\CriteriaCollection;
-use EthicalJobs\Storage\Hydrators\HydratesResults;
-use EthicalJobs\Storage\Hydrators\Elasticsearch\ObjectHydrator;
+use EthicalJobs\Storage\HasCriteria;
+use EthicalJobs\Storage\CriteriaCollection;
+use EthicalJobs\Storage\HydratesResults;
+use EthicalJobs\Elasticsearch\Hydrators\ObjectHydrator;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**

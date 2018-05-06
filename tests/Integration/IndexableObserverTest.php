@@ -5,7 +5,7 @@ namespace Tests\Integration;
 use Mockery;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
-use Tests\Fixtures;
+use Tests\Fixtures\Models;
 use EthicalJobs\Elasticsearch\Utilities;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
 use EthicalJobs\Elasticsearch\Testing\IndexableObservers;
@@ -37,7 +37,7 @@ class IndexableObserverTest extends \Tests\TestCase
 
         App::instance(Indexer::class, $indexer);
 
-        factory(Fixtures\Person::class)->create([
+        factory(Models\Person::class)->create([
             'first_name'    => 'Andrew',
             'last_name'     => 'McLagan',
         ]);
@@ -66,7 +66,7 @@ class IndexableObserverTest extends \Tests\TestCase
 
         App::instance(Indexer::class, $indexer);
 
-        factory(Fixtures\Person::class)
+        factory(Models\Person::class)
             ->create([
                 'first_name'    => 'Andrew',
                 'last_name'     => 'McLagan',
@@ -99,7 +99,7 @@ class IndexableObserverTest extends \Tests\TestCase
 
         App::instance(Indexer::class, $indexer);
 
-        $person = factory(Fixtures\Person::class)->create([
+        $person = factory(Models\Person::class)->create([
             'first_name'    => 'Andrew',
             'last_name'     => 'McLagan',
         ]);
@@ -129,7 +129,7 @@ class IndexableObserverTest extends \Tests\TestCase
 
         App::instance(Indexer::class, $indexer);
 
-        $family = factory(Fixtures\Family::class)->create([
+        $family = factory(Models\Family::class)->create([
             'surname' => 'McLagan',
         ]);
 
@@ -158,7 +158,7 @@ class IndexableObserverTest extends \Tests\TestCase
 
         App::instance(Indexer::class, $indexer);
 
-        $person = factory(Fixtures\Person::class)->create([
+        $person = factory(Models\Person::class)->create([
             'first_name' => 'Andrew',
         ]);
 
@@ -186,7 +186,7 @@ class IndexableObserverTest extends \Tests\TestCase
 
         App::instance(Indexer::class, $indexer);
 
-        $person = factory(Fixtures\Person::class)->create([
+        $person = factory(Models\Person::class)->create([
             'first_name'    => 'Andrew',
             'last_name'     => 'McLagan',
         ]);
@@ -216,7 +216,7 @@ class IndexableObserverTest extends \Tests\TestCase
 
         App::instance(Indexer::class, $indexer);
 
-        $person = factory(Fixtures\Person::class)->create();
+        $person = factory(Models\Person::class)->create();
 
         $person->update([
             'first_name'    => 'Werdna',

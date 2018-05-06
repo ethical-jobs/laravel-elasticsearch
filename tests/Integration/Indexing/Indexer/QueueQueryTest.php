@@ -11,7 +11,7 @@ use EthicalJobs\Elasticsearch\Indexing\Logging\Logger;
 use EthicalJobs\Elasticsearch\Indexing\IndexQuery;
 use EthicalJobs\Elasticsearch\Indexing\ProcessIndexQuery;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
-use Tests\Fixtures\Person;
+use Tests\Fixtures\Models\Person;
 
 class QueueQueryTest extends \Tests\TestCase
 {
