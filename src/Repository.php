@@ -172,6 +172,14 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
     /**
      * {@inheritdoc}
      */
+    public function whereHasIn(string $field, array $values) : Contracts\Repository
+    {
+        $fields = explode('.', $relation);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function orderBy(string $field, $direction = 'asc'): Contracts\Repository
     {
         $this->search->addSort(new FieldSort($field, $direction));
