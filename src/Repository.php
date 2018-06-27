@@ -8,6 +8,8 @@ use ONGR\ElasticsearchDSL\Search;
 use ONGR\ElasticsearchDSL\Sort\FieldSort;
 use ONGR\ElasticsearchDSL\Query\TermLevel;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
+use ONGR\ElasticsearchDSL\Query\FullText;
+use ONGR\ElasticsearchDSL\Query\Joining;
 use EthicalJobs\Storage\Contracts;
 use EthicalJobs\Storage\HasCriteria;
 use EthicalJobs\Storage\CriteriaCollection;
@@ -174,7 +176,19 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
      */
     public function whereHasIn(string $field, array $values) : Contracts\Repository
     {
-        $fields = explode('.', $relation);
+        $fields = explode('.', $field);
+
+        $boolQuery = new BoolQuery;
+
+        $termsQuery = new TermLevel\TermsQuery($field, $values);
+
+        $boolQuery->add($termsQuery);
+
+        $nestedQuery = new Joining\NestedQuery($fields[0], $boolQuery);
+
+        $this->search->addQuery($nestedQuery, BoolQuery::FILTER);  
+        
+        return $this;
     }
 
     /**
@@ -197,7 +211,22 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
         $this->search->setSize($limit);
 
         return $this;
-    }                      
+    }    
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function search(string $term = '') : Contracts\Repository
+    {
+        $query = new FullText\SimpleQueryStringQuery($term, [
+            'fields' => ['_all'],
+            'default_operator' => 'and',
+        ]);
+
+        $this->search->addQuery($query);
+
+        return $this;
+    }        
 
     /**
      * {@inheritdoc}
