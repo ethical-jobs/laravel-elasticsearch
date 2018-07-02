@@ -12,7 +12,7 @@ class WhereTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_find_by_range_operators()
     {
@@ -44,7 +44,7 @@ class WhereTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_find_by_wildcard_operator()
     {
@@ -73,7 +73,7 @@ class WhereTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_find_by_not_equals_operator()
     {
@@ -102,7 +102,7 @@ class WhereTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_find_by_equals_operator()
     {
@@ -131,7 +131,7 @@ class WhereTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_find_by_equals_operator_by_default()
     {

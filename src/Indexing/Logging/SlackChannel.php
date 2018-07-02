@@ -49,7 +49,15 @@ class SlackChannel
                 ],
             ])
             ->send($message);
-    }    
+    } 
+
+    /**
+     * {@inheritdoc}
+     */    
+    public function isEnabled() : bool
+    {
+        return config('elasticsearch.logging.slack.enabled') ?? false;
+    }
 
     /**
      * Converts an array to printable json

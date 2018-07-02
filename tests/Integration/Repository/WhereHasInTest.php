@@ -12,7 +12,7 @@ class WhereHasInTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_query_a_relation_with_whereIn_term_filter()
     {

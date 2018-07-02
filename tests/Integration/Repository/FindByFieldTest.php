@@ -12,7 +12,7 @@ class FindByFieldTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_find_by_a_field()
     {
@@ -41,7 +41,7 @@ class FindByFieldTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_throws_http_404_exception_when_no_model_found()
     {

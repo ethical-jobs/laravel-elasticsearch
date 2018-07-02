@@ -12,7 +12,7 @@ class LimitTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_add_a_limit()
     {

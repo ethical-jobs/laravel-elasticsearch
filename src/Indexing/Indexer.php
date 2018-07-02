@@ -41,6 +41,13 @@ class Indexer
     private $logger;    
 
     /**
+     * Wait for documents to be indexed and available
+     *
+     * @param bool
+     */
+    private $synchronous = false;     
+
+    /**
      * Constructor
      *
      * @param \Elasticsearch\Client $client
@@ -62,6 +69,16 @@ class Indexer
     /**
      * Indexes a indexable instance
      *
+     * @return void
+     */
+    public function synchronous() : void
+    {
+        $this->synchronous = true;
+    }
+
+    /**
+     * Indexes a indexable instance
+     *
      * @param \EthicalJobs\Elasticsearch\Indexabl $indexable
      * @return array
      */
@@ -71,6 +88,7 @@ class Indexer
             'index'     => $this->indexName,
             'id'        => $indexable->getDocumentKey(),
             'type'      => $indexable->getDocumentType(),
+            'refresh'   => $this->synchronous ? 'wait_for' : false,
             'body'      => $indexable->getDocumentTree(),
         ]);
     }
@@ -87,6 +105,7 @@ class Indexer
             'index'     => $this->indexName,
             'id'        => $indexable->getDocumentKey(),
             'type'      => $indexable->getDocumentType(),
+            'refresh'   => $this->synchronous ? 'wait_for' : false,
         ]);
     }    
 
@@ -141,9 +160,10 @@ class Indexer
 
             $params['body'][] = [
                 'index' => [
-                    '_index' => $this->indexName,
-                    '_id'    => $indexable->getDocumentKey(),
-                    '_type'  => $indexable->getDocumentType(),
+                    '_index'    => $this->indexName,
+                    '_id'       => $indexable->getDocumentKey(),
+                    '_type'     => $indexable->getDocumentType(),
+                    '_refresh'  => $this->synchronous ? 'wait_for' : false,
                 ],
             ];
 

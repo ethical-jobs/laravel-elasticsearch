@@ -14,7 +14,7 @@ class CriteriaTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Integration
+     * @group elasticsearch
      */
     public function its_criteria_are_an_empty_collection_by_default()
     {
@@ -29,7 +29,7 @@ class CriteriaTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Integration
+     * @group elasticsearch
      */
     public function it_can_set_and_get_it_criteria_collection()
     {
@@ -47,7 +47,7 @@ class CriteriaTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Integration
+     * @group elasticsearch
      */
     public function it_can_add_criteria_items()
     {
@@ -62,7 +62,7 @@ class CriteriaTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Integration
+     * @group elasticsearch
      */
     public function it_can_apply_criteria()
     {

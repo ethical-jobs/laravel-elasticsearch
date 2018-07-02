@@ -1,6 +1,6 @@
 <?php
 
-namespace EthicalJobs\Elasticsearch\Console;
+namespace EthicalJobs\Elasticsearch\Commands;
 
 use Illuminate\Console\Command;
 use Artisan;

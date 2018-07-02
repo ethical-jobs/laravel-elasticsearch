@@ -15,6 +15,7 @@ use EthicalJobs\Storage\HasCriteria;
 use EthicalJobs\Storage\CriteriaCollection;
 use EthicalJobs\Storage\HydratesResults;
 use EthicalJobs\Elasticsearch\Hydrators\ObjectHydrator;
+use EthicalJobs\Elasticsearch\Utilities;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -131,11 +132,13 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
      */
     public function where(string $field, $operator, $value = null): Contracts\Repository
     {
+        $operator = Utilities::translateOperator($operator);
+
         switch ($operator) {
-            case '<=':
-            case '>=':
-            case '<':
-            case '>':
+            case 'lte':
+            case 'gte':
+            case 'lt':
+            case 'gt':
                 $query = new TermLevel\RangeQuery($field, [$operator => $value]);
                 $bool = BoolQuery::FILTER;
                 break;

@@ -12,7 +12,7 @@ class WhereInTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_find_by_a_whereIn_terms_query()
     {

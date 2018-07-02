@@ -12,7 +12,7 @@ class FindByIdTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_find_by_id()
     {
@@ -41,7 +41,7 @@ class FindByIdTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_throws_http_404_exception_when_no_model_found()
     {

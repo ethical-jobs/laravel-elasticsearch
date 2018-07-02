@@ -12,7 +12,7 @@ class FindTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_searches_the_correct_index()
     {
@@ -35,7 +35,7 @@ class FindTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_searches_the_correct_document_type()
     {
@@ -58,7 +58,7 @@ class FindTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_throws_excepion_on_empty_results()
     {

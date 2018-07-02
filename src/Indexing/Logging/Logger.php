@@ -124,7 +124,9 @@ class Logger
     public function log(string $message, array $data): void
     {
         foreach ($this->channels as $channel) {
-            $channel->log($message, $data);
+            if ($channel->isEnabled()) {
+                $channel->log($message, $data);
+            }
         }
     }     
 

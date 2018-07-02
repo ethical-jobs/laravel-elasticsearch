@@ -1,6 +1,6 @@
 <?php
 
-namespace EthicalJobs\Elasticsearch\Console;
+namespace EthicalJobs\Elasticsearch\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -47,13 +47,6 @@ class IndexDocuments extends Command
      * @param \App\Services\Elasticsearch\Indexing\Indexer
      */
     private $indexer;
-
-    /**
-     * Resources to be indexed
-     *
-     * @param Array
-     */
-    private $indexables = [];
 
     /**
      * Constructor

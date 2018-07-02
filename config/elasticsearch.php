@@ -66,10 +66,14 @@ return [
    
     'logging' => [
         'slack' => [
+            'enabled'   => true,
             'webhook'   => 'https://hooks.slack.com/...',
             'channel'   => '#elasticsearch',
             'username'  => 'Elasticsearch',
-        ]
+        ],
+        'console' => [
+            'enabled'   => true,
+        ]        
     ],
 
     /*

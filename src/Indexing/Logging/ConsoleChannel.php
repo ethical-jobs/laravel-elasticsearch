@@ -40,6 +40,14 @@ class ConsoleChannel
             $this->console->writeln("<info>$message</info>");
             $this->console->writeln($this->encodeArray($data).PHP_EOL);
         }
+    }   
+    
+    /**
+     * {@inheritdoc}
+     */    
+    public function isEnabled() : bool
+    {
+        return config('elasticsearch.logging.console.enabled') ?? false;
     }    
 
     /**

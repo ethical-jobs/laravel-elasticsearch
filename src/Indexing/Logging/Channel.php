@@ -18,4 +18,11 @@ interface Channel
      * @return void
      */
     public function log(string $message, array $data): void;   
+
+    /**
+     * Returns true if channel is enabled
+     *
+     * @return bool
+     */
+    public function isEnabled() : bool;
 }

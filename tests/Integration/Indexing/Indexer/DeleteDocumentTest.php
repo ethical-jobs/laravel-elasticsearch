@@ -23,9 +23,10 @@ class DeleteDocumentTest extends \Tests\TestCase
  		$person = factory(Person::class)->create();
 
  		$params = [
-            'index' => $indexName,
-            'id'    => $person->getDocumentKey(),
-            'type'  => $person->getDocumentType(),
+            'index' 	=> $indexName,
+            'id'    	=> $person->getDocumentKey(),
+			'type'  	=> $person->getDocumentType(),
+			'refresh'	=> false,
  		];
 
  		$client = Mockery::mock(Client::class)
@@ -40,5 +41,40 @@ class DeleteDocumentTest extends \Tests\TestCase
  		$response = $indexer->deleteDocument($person);
 
  		$this->assertEquals(['hits' => 1], $response);
-    } 	    
+	} 	
+	
+    /**
+     * @test
+     * @group Integration
+     */
+    public function it_can_index_documents_synchronously()
+    {
+		$logger = Mockery::mock(Logger::class)->shouldIgnoreMissing();
+
+ 		$indexName = 'test-index';
+
+ 		$person = factory(Person::class)->create();
+
+ 		$params = [
+            'index' 	=> $indexName,
+            'id'    	=> $person->getDocumentKey(),
+			'type'  	=> $person->getDocumentType(),
+			'refresh'	=> 'wait_for',
+ 		];
+
+ 		$client = Mockery::mock(Client::class)
+ 			->shouldReceive('delete')
+ 			->once()
+ 			->with($params)
+ 			->andReturn(['hits' => 1])
+ 			->getMock();
+
+		$indexer = new Indexer($client, $logger, $indexName);
+		 
+		$indexer->synchronous();
+
+ 		$response = $indexer->deleteDocument($person);
+
+ 		$this->assertEquals(['hits' => 1], $response);
+    }	
 }

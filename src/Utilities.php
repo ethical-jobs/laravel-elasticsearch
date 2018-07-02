@@ -53,4 +53,26 @@ class Utilities
             class_uses($entity)
         );
     }    
+
+    /**
+     * Translates SQL like operators to ES dsl operators
+     *
+     * @param string $operator
+     * @return string
+     */
+    public static function translateOperator(string $operator): string
+    {
+        switch ($operator) {
+            case '<=':
+                return 'lte';
+            case '>=':
+                return 'gte';
+            case '<':
+                return 'lt';
+            case '>':
+                return 'gt';                                  
+        }
+
+        return '';
+    }     
 }

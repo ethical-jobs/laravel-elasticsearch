@@ -15,7 +15,7 @@ class HydratorTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_hydrate_results_as_models()
     {
@@ -41,7 +41,7 @@ class HydratorTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_hydrate_results_as_objects_by_default()
     {
@@ -66,7 +66,7 @@ class HydratorTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_hydrate_results_as_objects()
     {

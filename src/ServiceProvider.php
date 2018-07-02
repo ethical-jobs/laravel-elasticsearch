@@ -10,7 +10,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
 use EthicalJobs\Elasticsearch\Indexing\Logging;
 use EthicalJobs\Elasticsearch\IndexSettings;
-use EthicalJobs\Elasticsearch\Console;
+use EthicalJobs\Elasticsearch\Commands;
 use EthicalJobs\Elasticsearch\Index;
 
 /**
@@ -166,10 +166,10 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                Console\CreateIndex::class,
-                Console\DeleteIndex::class,
-                Console\FlushIndex::class,
-                Console\IndexDocuments::class,
+                Commands\CreateIndex::class,
+                Commands\DeleteIndex::class,
+                Commands\FlushIndex::class,
+                Commands\IndexDocuments::class,
             ]);
         }
     }        

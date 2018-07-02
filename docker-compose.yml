@@ -1,0 +1,17 @@
+version: '2'
+services:       
+
+  elasticsearch:
+    image: elasticsearch:5-alpine
+    volumes: [ './volumes/elasticsearch:/usr/share/elasticsearch/data' ]
+    ports: [ '9200:9200' ]
+
+  php: 
+    image: php:7.2-cli-alpine
+    volumes: [ './:/usr/src' ]  
+    working_dir: /usr/src
+    links: [ elasticsearch ]   
+    environment:
+      - ES_HOST=elasticsearch:9200
+      - TERM=xterm-256color
+    

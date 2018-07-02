@@ -12,7 +12,7 @@ class ElasticsearchRepositoryTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_set_and_get_its_storage_engine()
     {
