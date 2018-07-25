@@ -5,7 +5,6 @@ namespace Tests\Integration\Repositories;
 use Mockery;
 use Elasticsearch\Client;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
-use Tests\Helpers\RepositoryFactory;
 use Tests\Helpers\Indexer;
 use Tests\Fixtures\Models;
 use Tests\Fixtures\Repositories\PersonRepository;
@@ -16,27 +15,65 @@ class WhereTest extends \Tests\TestCase
      * @test
      * @group elasticsearch
      */
-    public function it_can_find_by_greater_then_operator()
+    public function it_can_filter_by_comparison_operators()
     {
+        factory(Models\Person::class, 2)->create([
+            'age' => 67,
+        ]);
+
         factory(Models\Person::class, 2)->create([
             'age' => 65,
         ]);
 
         factory(Models\Person::class, 2)->create([
-            'age' => 35,
+            'age' => 60,
         ]);
 
-        Indexer::all(Models\Person::class);      
+        Indexer::all(Models\Person::class);     
+        
+        dump(resolve(PersonRepository::class)->find()->count());  
 
-        $repository = resolve(PersonRepository::class);
-
-        $people = $repository
+        resolve(PersonRepository::class)
             ->where('age', '>', 65)
-            ->find();
-//!!!
-        foreach ($people as $person) {
-            $this->assertTrue($person->age > 65);
-        }            
+            ->find()
+            ->each(function ($person) {
+                $this->assertTrue($person->age > 65);
+            });        
+
+       resolve(PersonRepository::class)
+            ->where('age', '>=', 65)
+            ->find()
+            ->each(function ($person) {
+                $this->assertTrue($person->age >= 65);
+            });    
+            
+       resolve(PersonRepository::class)
+            ->where('age', '<', 65)
+            ->find()
+            ->each(function ($person) {
+                $this->assertTrue($person->age < 65);
+            });   
+            
+       resolve(PersonRepository::class)
+            ->where('age', '<=', 65)
+            ->find()
+            ->each(function ($person) {
+                $this->assertTrue($person->age <= 65);
+            });    
+            
+       resolve(PersonRepository::class)
+            ->where('age', '=', 65)
+            ->find()
+            ->each(function ($person) {
+                $this->assertTrue($person->age == 65);
+            });  
+            
+       resolve(PersonRepository::class)
+            ->where('age', '!=', 65)
+            ->find()
+            ->each(function ($person) {
+                $this->assertTrue($person->age != 65);
+            });              
     }  
 
     /**
@@ -45,113 +82,29 @@ class WhereTest extends \Tests\TestCase
      */
     public function it_can_find_by_wildcard_operator()
     {
-        $people = factory(Models\Person::class, 10)->create();
+        factory(Models\Person::class)->create([
+            'first_name' => 'Trump',
+            'age' => 33
+        ]);
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withArgs(function($query) {
-                $this->assertEquals('Andre* McL*an', array_get($query, 
-                    'body.query.bool.filter.0.wildcard.name.value'
-                ));
-                return true;
-            })
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
+        factory(Models\Person::class)->create([
+            'first_name' => 'Ivanka Trump',
+            'age' => 33
+        ]);
+        
+        factory(Models\Person::class)->create([
+            'first_name' => 'Barak Obama',
+            'age' => 33
+        ]);        
 
-        $repository = RepositoryFactory::make($client, new Models\Person);     
+        Indexer::all(Models\Person::class); 
 
-        $result = $repository
-            ->where('name', 'like', 'Andre% McL%an')
-            ->find();
+        // dump(resolve(PersonRepository::class)->find()->count());  
 
-        $this->assertEquals(10, $result->count());        
-    }    
+        $people = resolve(PersonRepository::class)
+            ->where('first_name', 'like', 'Tr%mp')
+            ->find();  
 
-    /**
-     * @test
-     * @group elasticsearch
-     */
-    public function it_can_find_by_not_equals_operator()
-    {
-        $people = factory(Models\Person::class, 10)->create();
-
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withArgs(function($query) {
-                $this->assertEquals(34, array_get($query, 
-                    'body.query.bool.must_not.0.term.age'
-                ));
-                return true;
-            })
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
-
-        $repository = RepositoryFactory::make($client, new Models\Person);         
-
-        $result = $repository
-            ->where('age', '!=', 34)
-            ->find();
-
-        $this->assertEquals(10, $result->count());        
-    }       
-
-    /**
-     * @test
-     * @group elasticsearch
-     */
-    public function it_can_find_by_equals_operator()
-    {
-        $people = factory(Models\Person::class, 10)->create();
-
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withArgs(function($query) {
-                $this->assertEquals(34, array_get($query, 
-                    'body.query.bool.filter.0.term.age'
-                ));
-                return true;
-            })
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
-
-        $repository = RepositoryFactory::make($client, new Models\Person);         
-
-        $result = $repository
-            ->where('age', '=', 34)
-            ->find();
-
-        $this->assertEquals(10, $result->count());        
-    }  
-
-    /**
-     * @test
-     * @group elasticsearch
-     */
-    public function it_can_find_by_equals_operator_by_default()
-    {
-        $people = factory(Models\Person::class, 10)->create();
-
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withArgs(function($query) {
-                $this->assertEquals(37, array_get($query, 
-                    'body.query.bool.filter.0.term.age'
-                ));
-                return true;
-            })
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
-
-        $repository = RepositoryFactory::make($client, new Models\Person);         
-
-        $result = $repository
-            ->where('age', 37)
-            ->find();
-
-        $this->assertEquals(10, $result->count());        
-    }                 
+        dd($people);
+    }                
 }

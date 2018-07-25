@@ -23,9 +23,9 @@ class UtilitiesTest extends \Tests\TestCase
      * @test
      * @group Unit
      */
-    public function it_returns_empty_string_when_unable_to_translate_operator()
+    public function it_returns_original_operator_when_unable_to_translate()
     {
-        $this->assertEquals('', Utilities::translateOperator('>=='));
+        $this->assertEquals('like', Utilities::translateOperator('like'));
     }  
     
     /**
