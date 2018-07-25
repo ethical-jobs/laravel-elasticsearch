@@ -75,7 +75,7 @@ class IndexQuery
      * @var array $chunks
      * @return $this
      */
-    public function setChunks(array $chunks): IndexQuery
+    public function setChunks(array $chunks) : IndexQuery
     {
         $this->chunks = new Collection($chunks);
 
@@ -87,7 +87,7 @@ class IndexQuery
      *
      * @return \Illuminate\Support\Collection
      */
-    public function getChunks(): Collection
+    public function getChunks() : Collection
     {
         return $this->chunks;
     } 
@@ -98,7 +98,7 @@ class IndexQuery
      * @var int $processCount
      * @return $this
      */
-    public function setNumberOfProcesses(int $processCount): IndexQuery
+    public function setNumberOfProcesses(int $processCount) : IndexQuery
     {
         $this->processCount = $processCount;
 
@@ -110,7 +110,7 @@ class IndexQuery
      *
      * @return int
      */
-    public function documentCount(): int
+    public function documentCount() : int
     {
         return $this->indexable->getIndexingQuery()->count();
     }    
@@ -120,7 +120,7 @@ class IndexQuery
      *
      * @return int
      */
-    public function chunkCount(): int
+    public function chunkCount() : int
     {
         return $this->chunks->count();
     }     
@@ -130,7 +130,7 @@ class IndexQuery
      *
      * @return int
      */
-    public function processCount(): int
+    public function processCount() : int
     {
         return $this->processCount;
     }           
@@ -140,7 +140,7 @@ class IndexQuery
      *
      * @return Collection
      */
-    public function split(): Collection
+    public function split() : Collection
     {
         $queries = new Collection;
 
@@ -161,7 +161,7 @@ class IndexQuery
      * @param callable $callback
      * @return void
      */
-    public function chunk(callable $callback): void
+    public function chunk(callable $callback) : void
     {
         $index = 0;
 
@@ -181,7 +181,7 @@ class IndexQuery
      *
      * @return $this
      */
-    protected function makeChunks(): IndexQuery
+    protected function makeChunks() : IndexQuery
     {
         $numberOfChunks = (int) ceil($this->documentCount() / $this->chunkSize); 
 

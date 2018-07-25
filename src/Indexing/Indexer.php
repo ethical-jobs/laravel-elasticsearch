@@ -119,7 +119,7 @@ class Indexer
     {
         $this->logger->join($indexQuery);
 
-        $indexQuery->chunk(function($chunk, $index) use($indexQuery) {
+        $indexQuery->chunk(function($chunk, $index) {
 
             $response = $this->bulkRequest($chunk);
 
@@ -154,7 +154,10 @@ class Indexer
      */
     protected function bulkRequest(Collection $collection): array
     {
-        $params = [];
+        $params = [
+            'body' => [],
+            'refresh' => $this->synchronous ? 'wait_for' : false,
+        ];
 
         foreach ($collection as $indexable) {
 
@@ -163,7 +166,6 @@ class Indexer
                     '_index'    => $this->indexName,
                     '_id'       => $indexable->getDocumentKey(),
                     '_type'     => $indexable->getDocumentType(),
-                    '_refresh'  => $this->synchronous ? 'wait_for' : false,
                 ],
             ];
 
