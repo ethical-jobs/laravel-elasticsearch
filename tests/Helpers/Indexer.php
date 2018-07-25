@@ -14,6 +14,13 @@ use EthicalJobs\Elasticsearch\Indexable;
 
 class Indexer
 {
+
+    // @todo
+    // This class has useful functions that should be ported
+    // to the core indexer and tested!
+
+
+
     /**
      * Index a single document
      *
