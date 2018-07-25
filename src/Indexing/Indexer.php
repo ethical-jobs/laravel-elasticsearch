@@ -67,7 +67,7 @@ class Indexer
     }
 
     /**
-     * Indexes a indexable instance
+     * Enables "blocking" synchronous document indexing
      *
      * @return void
      */
@@ -155,17 +155,17 @@ class Indexer
     protected function bulkRequest(Collection $collection): array
     {
         $params = [
-            'body' => [],
             'refresh' => $this->synchronous ? 'wait_for' : false,
+            'body' => [],
         ];
 
         foreach ($collection as $indexable) {
 
             $params['body'][] = [
                 'index' => [
-                    '_index'    => $this->indexName,
-                    '_id'       => $indexable->getDocumentKey(),
-                    '_type'     => $indexable->getDocumentType(),
+                    '_index' => $this->indexName,
+                    '_id' => $indexable->getDocumentKey(),
+                    '_type' => $indexable->getDocumentType(),
                 ],
             ];
 

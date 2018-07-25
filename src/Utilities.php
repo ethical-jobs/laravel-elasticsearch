@@ -73,6 +73,6 @@ class Utilities
                 return 'gt';                                  
         }
 
-        return '';
+        return $operator;
     }     
 }
