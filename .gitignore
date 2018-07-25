@@ -1,5 +1,6 @@
 # paths
 vendor/
+/volumes
 node_modules/
 storage/logs/
 bootstrap/cache/
