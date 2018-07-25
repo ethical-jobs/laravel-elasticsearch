@@ -4,9 +4,11 @@ namespace Tests\Integration\Repositories;
 
 use Mockery;
 use Elasticsearch\Client;
-use Tests\Fixtures\RepositoryFactory;
-use Tests\Fixtures\Models;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
+use Tests\Helpers\RepositoryFactory;
+use Tests\Helpers\Indexer;
+use Tests\Fixtures\Models;
+use Tests\Fixtures\Repositories\PersonRepository;
 
 class WhereTest extends \Tests\TestCase
 {
@@ -14,32 +16,27 @@ class WhereTest extends \Tests\TestCase
      * @test
      * @group elasticsearch
      */
-    public function it_can_find_by_range_operators()
+    public function it_can_find_by_greater_then_operator()
     {
-        $people = factory(Models\Person::class, 10)->create();
+        factory(Models\Person::class, 2)->create([
+            'age' => 65,
+        ]);
 
-        foreach (['<=','>=','<','>'] as $operator) {
+        factory(Models\Person::class, 2)->create([
+            'age' => 35,
+        ]);
 
-            $client = Mockery::mock(Client::class)
-                ->shouldReceive('search')
-                ->once()
-                ->withArgs(function($query) use ($operator) {
-                    $this->assertEquals([$operator => 65], array_get($query, 
-                        'body.query.bool.filter.0.range.age'
-                    ));
-                    return true;
-                })
-                ->andReturn(SearchResultsFactory::getSearchResults($people))
-                ->getMock();       
+        Indexer::all(Models\Person::class);      
 
-            $repository = RepositoryFactory::make($client, new Models\Person);     
-    
-            $result = $repository
-                ->where('age', $operator, 65)
-                ->find();
+        $repository = resolve(PersonRepository::class);
 
-            $this->assertEquals(10, $result->count());        
-        }
+        $people = $repository
+            ->where('age', '>', 65)
+            ->find();
+//!!!
+        foreach ($people as $person) {
+            $this->assertTrue($person->age > 65);
+        }            
     }  
 
     /**
