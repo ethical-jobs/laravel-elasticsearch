@@ -25,7 +25,8 @@ class IndexDocumentTest extends \Tests\TestCase
  		$params = [
             'index'     => $indexName,
             'id'        => $person->getDocumentKey(),
-            'type'      => $person->getDocumentType(),
+			'type'      => $person->getDocumentType(),
+			'refresh'	=> false,
             'body'      => $person->getDocumentTree(),
  		];
 

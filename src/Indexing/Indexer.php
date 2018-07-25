@@ -67,7 +67,7 @@ class Indexer
     }
 
     /**
-     * Indexes a indexable instance
+     * Enables "blocking" synchronous document indexing
      *
      * @return void
      */
