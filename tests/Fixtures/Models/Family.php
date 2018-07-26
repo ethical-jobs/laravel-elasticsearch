@@ -17,7 +17,7 @@ class Family extends Model implements Indexable
 
     public function members()
     {
-        return $this->hasOne(Person::class);
+        return $this->hasMany(Person::class);
     }     
 
     public function getDocumentRelations()
@@ -29,6 +29,7 @@ class Family extends Model implements Indexable
     {
         return [
             'surname' => ['type' => 'text'],
+            'members' => ['type' => 'object'],
         ];
     } 
 }

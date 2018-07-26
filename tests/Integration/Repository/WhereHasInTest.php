@@ -2,45 +2,57 @@
 
 namespace Tests\Integration\Repositories;
 
-use Mockery;
-use Elasticsearch\Client;
-use Tests\Fixtures\RepositoryFactory;
+use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
+use Tests\Fixtures\Repositories\FamilyRepository;
+use Tests\Helpers\Indexer;
 use Tests\Fixtures\Models;
-use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
 class WhereHasInTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group elasticsearch
      */
     public function it_can_query_a_relation_with_whereIn_term_filter()
     {
-        $people = factory(Models\Person::class, 10)->create();
+        $obamas = factory(Models\Family::class)->create(['surname' => 'Obama']);
+        $trumps = factory(Models\Family::class)->create(['surname' => 'Trump']);
+        $clintons = factory(Models\Family::class)->create(['surname' => 'Clinton']);
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withArgs(function($query) {
-                dump($query);
-                $this->assertEquals(array_get($query, 'body.query'), [
-                    'simple_query_string' => [
-                        'default_operator' => 'and',
-                        'query' => 'How much wood could a Woodchuck chuck?',
-                        'fields' => [ '_all' ],
-                    ],                 
-                ]);        
-                return true;
-            })
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
+        factory(Models\Person::class, 2)->create([
+            'sex' => 'male',
+            'family_id' => $obamas->id,
+        ]);
 
-        $repository = RepositoryFactory::make($client, new Models\Person);   
+        factory(Models\Person::class)->create([
+            'sex' => 'female',
+            'family_id' => $obamas->id,
+        ]);        
 
-        $result = $repository
-            ->whereHasIn('categories.slug', ['admin','aged-care','family-services'])
+        factory(Models\Person::class)->create([
+            'sex' => 'trans',
+            'family_id' => $trumps->id,
+        ]);          
+    
+        Indexer::all(Models\Family::class);     
+
+        $families = resolve(FamilyRepository::class)
+            ->whereHasIn('members.sex', ['male','trans'])
             ->find();
 
-        $this->assertEquals(10, $result->count());        
-    }                  
+        $this->assertEquals(2, $families->count());
+        $this->assertEquals($families->pluck('surname')->toArray(), ['Trump','Obama']);
+
+        foreach ($families as $family) {
+
+            $shouldHaveAtLeastOne = false;
+
+            foreach ($family->members->pluck('sex') as $gender) {
+                if (in_array($gender, ['male','trans'])) {
+                    $shouldHaveAtLeastOne = true;
+                }
+            }
+
+            $this->assertTrue($shouldHaveAtLeastOne);
+        }
+    }        
 }

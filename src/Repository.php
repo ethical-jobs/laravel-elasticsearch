@@ -183,17 +183,23 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
      */
     public function whereHasIn(string $field, array $values) : Contracts\Repository
     {
+        // $fields = explode('.', $field);
+
+        // $boolQuery = new BoolQuery;
+
+        // $termsQuery = new TermLevel\TermsQuery($field, $values);
+
+        // $boolQuery->add($termsQuery);
+
+        // $nestedQuery = new Joining\NestedQuery($fields[0], $boolQuery);
+
+        // $this->search->addQuery($nestedQuery, BoolQuery::FILTER);  
+
         $fields = explode('.', $field);
 
-        $boolQuery = new BoolQuery;
+        $query = new TermLevel\TermsQuery($field, $values);
 
-        $termsQuery = new TermLevel\TermsQuery($field, $values);
-
-        $boolQuery->add($termsQuery);
-
-        $nestedQuery = new Joining\NestedQuery($fields[0], $boolQuery);
-
-        $this->search->addQuery($nestedQuery, BoolQuery::FILTER);  
+        $this->search->addQuery($query, BoolQuery::FILTER);  
         
         return $this;
     }

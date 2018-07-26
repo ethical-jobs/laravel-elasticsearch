@@ -2,41 +2,62 @@
 
 namespace Tests\Integration\Repositories;
 
-use Mockery;
-use Elasticsearch\Client;
-use Tests\Fixtures\RepositoryFactory;
+use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
+use Tests\Fixtures\Repositories\PersonRepository;
+use Tests\Helpers\Indexer;
 use Tests\Fixtures\Models;
-use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
 class WhereInTest extends \Tests\TestCase
 {
+    use ResetElasticsearchIndex;
+
     /**
      * @test
-     * @group elasticsearch
      */
     public function it_can_find_by_a_whereIn_terms_query()
     {
-        $people = factory(Models\Person::class, 10)->create();
+        factory(Models\Person::class)->create(['age' => 61]);
+        factory(Models\Person::class)->create(['age' => 62]);
+        factory(Models\Person::class)->create(['age' => 63]);
+        factory(Models\Person::class)->create(['age' => 64]);
+        factory(Models\Person::class)->create(['age' => 65]);
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withArgs(function($query) {
-                // dd($query);
-                $this->assertEquals([34,65,14,21], array_get($query, 
-                    'body.query.bool.filter.0.terms.age'
-                ));
-                return true;
-            })
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
+        Indexer::all(Models\Person::class);     
 
-        $repository = RepositoryFactory::make($client, new Models\Person);
-
-        $result = $repository
-            ->whereIn('age', [34,65,14,21])
+        $people = resolve(PersonRepository::class)
+            ->whereIn('age', [61,63,65])
             ->find();
 
-        $this->assertEquals(10, $result->count());        
-    }                  
+        $this->assertEquals(3, $people->count());           
+
+        foreach ($people as $person) {
+            $this->assertTrue(in_array($person->age, [61,63,65]));
+        }
+    }      
+    
+    /**
+     * @test
+     */
+    public function it_can_find_by_multiple_whereIn_filters()
+    {
+        factory(Models\Person::class)->create(['age' => 61, 'sex' => 'male']);
+        factory(Models\Person::class)->create(['age' => 65, 'sex' => 'female']);
+        factory(Models\Person::class)->create(['age' => 62, 'sex' => 'trans']);
+        factory(Models\Person::class)->create(['age' => 63, 'sex' => 'female']);
+        factory(Models\Person::class)->create(['age' => 65, 'sex' => 'male']);
+
+        Indexer::all(Models\Person::class);     
+
+        $people = resolve(PersonRepository::class)
+            ->whereIn('age', [61,62])
+            ->whereIn('sex', ['male','trans'])
+            ->find();
+
+        $this->assertEquals(2, $people->count());           
+
+        foreach ($people as $person) {
+            $this->assertTrue(in_array($person->age, [61,62]));
+            $this->assertTrue(in_array($person->sex, ['male','trans']));
+        }
+    }       
 }

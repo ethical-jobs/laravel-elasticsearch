@@ -20,7 +20,17 @@ class Person extends Model implements Indexable
         'first_name',    
         'last_name',     
         'age',
+        'sex',
         'email',         
+    ];    
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'age' => 'integer',
     ];    
 
     public function family()
@@ -39,6 +49,7 @@ class Person extends Model implements Indexable
             'first_name'    => ['type' => 'text'],
             'last_name'     => ['type' => 'text'],
             'age'           => ['type' => 'integer'],
+            'sex'           => ['type' => 'keyword'],
             'email'         => ['type' => 'text'],
         ];
     }         

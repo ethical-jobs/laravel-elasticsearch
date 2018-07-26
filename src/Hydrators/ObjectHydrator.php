@@ -92,7 +92,13 @@ class ObjectHydrator implements Hydrator
 
         foreach ($relations as $relation) {
             if (isset($hit[$relation]) && is_array($hit[$relation])) {
-                $relationHits[$relation] = $this->hydrateEntity($hit[$relation]);
+
+                $relationHits[$relation] = new Collection;
+
+                foreach ($hit[$relation] as $relationHit) {
+                    $relatedHit = $this->hydrateEntity($relationHit);
+                    $relationHits[$relation]->put($relatedHit['id'], $relatedHit);
+                }
             }
         }
 

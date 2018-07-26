@@ -112,7 +112,6 @@ class ObjectHydratorTest extends \Tests\TestCase
     /**
      * @test
      * @group Integration
-     * @group skipped
      */
     public function it_builds_document_relations()
     {
@@ -139,6 +138,8 @@ class ObjectHydratorTest extends \Tests\TestCase
         foreach ($hydrated as $family) {
             foreach ($expectedRelations as $relation) {
                 $this->assertTrue(isset($family->$relation->id));
+                $this->assertTrue(false); // Need to extend this test @see WhereHasInTest - hydrating relations as objects
+                // its now also a collection
             }
         }
     }
