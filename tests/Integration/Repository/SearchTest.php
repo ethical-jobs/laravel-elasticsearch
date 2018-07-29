@@ -2,44 +2,45 @@
 
 namespace Tests\Integration\Repositories;
 
-use Mockery;
-use Elasticsearch\Client;
-use Tests\Fixtures\RepositoryFactory;
+use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
+use Tests\Fixtures\Repositories\PersonRepository;
+use Tests\Helpers\Indexer;
 use Tests\Fixtures\Models;
-use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
 class SearchTest extends \Tests\TestCase
 {
+    use ResetElasticsearchIndex;
+
     /**
      * @test
-     * @group elasticsearch
      */
-    public function it_can_add_a_search_term_filter()
+    public function it_can_filter_by_keyword()
     {
-        $people = factory(Models\Person::class, 10)->create();
+        factory(Models\Person::class)->create([
+            'first_name' => 'Donald',
+            'last_name' => 'Trump',
+        ]);
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withArgs(function($query) {
-                $this->assertEquals(array_get($query, 'body.query'), [
-                    'simple_query_string' => [
-                        'default_operator' => 'and',
-                        'query' => 'How much wood could a Woodchuck chuck?',
-                        'fields' => [ '_all' ],
-                    ],                 
-                ]);        
-                return true;
-            })
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
+        factory(Models\Person::class)->create([
+            'first_name' => 'Donald',
+            'last_name' => 'Ivanka',
+        ]);        
 
-        $repository = RepositoryFactory::make($client, new Models\Person);   
+        factory(Models\Person::class)->create([
+            'first_name' => 'Barak',
+            'last_name' => 'Obama',
+        ]);        
 
-        $result = $repository
-            ->search('How much wood could a Woodchuck chuck?')
+        Indexer::all(Models\Person::class);     
+
+        $people = resolve(PersonRepository::class)
+            ->search('Barak')
             ->find();
 
-        $this->assertEquals(10, $result->count());        
-    }                  
+        $this->assertEquals(1, $people->count());           
+
+        foreach ($people as $person) {
+            $this->assertTrue(str_contains($person->first_name, 'Barak'));
+        }
+    }          
 }

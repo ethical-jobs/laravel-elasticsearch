@@ -82,6 +82,8 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
         $this->criteria = new CriteriaCollection;
 
         $this->setHydrator(new ObjectHydrator);
+
+        $this->limit(10000); // ES max
     }
 
     /**
@@ -182,19 +184,7 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
      * {@inheritdoc}
      */
     public function whereHasIn(string $field, array $values) : Contracts\Repository
-    {
-        // $fields = explode('.', $field);
-
-        // $boolQuery = new BoolQuery;
-
-        // $termsQuery = new TermLevel\TermsQuery($field, $values);
-
-        // $boolQuery->add($termsQuery);
-
-        // $nestedQuery = new Joining\NestedQuery($fields[0], $boolQuery);
-
-        // $this->search->addQuery($nestedQuery, BoolQuery::FILTER);  
-
+    {  
         $fields = explode('.', $field);
 
         $query = new TermLevel\TermsQuery($field, $values);
