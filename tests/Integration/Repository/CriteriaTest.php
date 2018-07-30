@@ -4,21 +4,22 @@ namespace Tests\Integration\Repositories;
 
 use Mockery;
 use Tests\Fixtures\Models;
-use Tests\Fixtures\RepositoryFactory;
+use Tests\Helpers\Indexer;
 use Tests\Fixtures\Criteria;
 use EthicalJobs\Storage\CriteriaCollection;
-use EthicalJobs\Storage\Repositories\ElasticsearchRepository;
-use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
+use Tests\Fixtures\Repositories\PersonRepository;
+use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
 
 class CriteriaTest extends \Tests\TestCase
 {
+    use ResetElasticsearchIndex;
+
     /**
      * @test
-     * @group elasticsearch
      */
     public function its_criteria_are_an_empty_collection_by_default()
     {
-        $repository = RepositoryFactory::make();  
+        $repository = resolve(PersonRepository::class);  
         
         $criteria = $repository->getCriteriaCollection();
 
@@ -29,11 +30,10 @@ class CriteriaTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group elasticsearch
      */
     public function it_can_set_and_get_it_criteria_collection()
     {
-        $repository = RepositoryFactory::make();  
+        $repository = resolve(PersonRepository::class);  
 
         $collection = new CriteriaCollection([
             Criteria\Males::class,
@@ -47,11 +47,10 @@ class CriteriaTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group elasticsearch
      */
     public function it_can_add_criteria_items()
     {
-        $repository = RepositoryFactory::make();  
+        $repository = resolve(PersonRepository::class);  
         
         $expected = $repository->addCriteria(Criteria\OverFifity::class)
             ->getCriteriaCollection()
@@ -62,28 +61,24 @@ class CriteriaTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group elasticsearch
      */
     public function it_can_apply_criteria()
     {
-        $overFifties = factory(Models\Person::class, 5)
-            ->create(['age' => 55]);        
+        factory(Models\Person::class, 2)->create([
+            'age' => 55,
+        ]);        
 
-        $searchResults = SearchResultsFactory::getSearchResults($overFifties);
+        factory(Models\Person::class, 2)->create([
+            'age' => 30,
+        ]);                
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withAnyArgs()
-            ->andReturn($searchResults)
-            ->getMock();
-
-        $repository = RepositoryFactory::make();  
+        Indexer::all(Models\Person::class);   
         
-        $people = $repository
-            ->setStorageEngine($client)
+        $people = resolve(PersonRepository::class)
             ->addCriteria(Criteria\OverFifity::class)
             ->find();
+
+        $this->assertEquals(2, $people->count());
 
         $people->each(function($person) {
             $this->assertTrue($person->age > 50);

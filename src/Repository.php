@@ -113,7 +113,7 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
 
         $this->search->addQuery($query, BoolQuery::FILTER);        
 
-        return $this->find()->first();
+        return $this->limit(1)->find()->first();
     }  
 
     /**
@@ -123,9 +123,9 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
     {
         $query = new TermLevel\TermQuery($field, $value);
 
-        $this->search->addQuery($query, BoolQuery::FILTER);        
+        $this->search->addQuery($query);        
 
-        return $this->find()->first();
+        return $this->limit(1)->find()->first();
     }     
 
     /**
@@ -237,6 +237,8 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
     public function find() : iterable
     {
         // dd($this->search->toArray());
+
+        $this->applyCriteria();
 
         $response = $this->client->search([
             'index' => $this->indexName,

@@ -40,7 +40,7 @@ class SearchTest extends \Tests\TestCase
         $this->assertEquals(1, $people->count());           
 
         foreach ($people as $person) {
-            $this->assertTrue(str_contains($person->first_name, 'Barak'));
+            $this->assertTrue(str_contains($person->full_name, 'Barak'));
         }
     }          
 }

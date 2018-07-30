@@ -25,6 +25,15 @@ class Person extends Model implements Indexable
     ];    
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'full_name'
+    ];    
+
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array
@@ -32,6 +41,11 @@ class Person extends Model implements Indexable
     protected $casts = [
         'age' => 'integer',
     ];    
+
+    public function getFullNameAttribute()
+    {
+        return $this->first_name.' '.$this->last_name;
+    }
 
     public function family()
     {
@@ -46,11 +60,12 @@ class Person extends Model implements Indexable
     public function getDocumentMappings()
     {
         return [
-            'first_name'    => ['type' => 'text'],
-            'last_name'     => ['type' => 'text'],
-            'age'           => ['type' => 'integer'],
-            'sex'           => ['type' => 'keyword'],
-            'email'         => ['type' => 'text'],
+            'first_name' => ['type' => 'keyword'],
+            'last_name' => ['type' => 'keyword'],
+            'full_name' => ['type' => 'text'],
+            'age' => ['type' => 'integer'],
+            'sex' => ['type' => 'keyword'],
+            'email' => ['type' => 'keyword'],
         ];
     }         
 }
