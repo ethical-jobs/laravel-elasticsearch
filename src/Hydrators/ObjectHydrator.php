@@ -3,6 +3,7 @@
 namespace EthicalJobs\Elasticsearch\Hydrators;
 
 use ArrayObject;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use EthicalJobs\Storage\Contracts\Hydrator;
 use EthicalJobs\Elasticsearch\Indexable;
@@ -92,12 +93,16 @@ class ObjectHydrator implements Hydrator
 
         foreach ($relations as $relation) {
             if (isset($hit[$relation]) && is_array($hit[$relation])) {
-
-                $relationHits[$relation] = new Collection;
-
-                foreach ($hit[$relation] as $relationHit) {
-                    $relatedHit = $this->hydrateEntity($relationHit);
-                    $relationHits[$relation]->put($relatedHit['id'], $relatedHit);
+                if (Arr::isAssoc($hit[$relation])) { 
+                    // Is a single document relation
+                    $relationHits[$relation] =  $this->hydrateEntity($hit[$relation]);
+                } else { 
+                    // Is collection of related documents
+                    $relationHits[$relation] = new Collection;
+                    foreach ($hit[$relation] as $relationHit) {
+                        $relatedHit = $this->hydrateEntity($relationHit);
+                        $relationHits[$relation]->put($relatedHit['id'], $relatedHit);
+                    }                    
                 }
             }
         }

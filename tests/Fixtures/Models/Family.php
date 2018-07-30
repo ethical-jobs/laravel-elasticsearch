@@ -10,7 +10,7 @@ class Family extends Model implements Indexable
 {
     use Document;
     
-    public function vehicles()
+    public function vehicle()
     {
         return $this->hasOne(Vehicle::class);
     }
@@ -22,7 +22,7 @@ class Family extends Model implements Indexable
 
     public function getDocumentRelations()
     {
-        return ['vehicles','members'];
+        return ['vehicle','members'];
     }     
 
     public function getDocumentMappings()
