@@ -4,6 +4,7 @@
 - Rewrite: repository layer
 - Rewrite: testing
 - Removed slack logging
+- Configuration refactor
 
 # v1.6.1
 
