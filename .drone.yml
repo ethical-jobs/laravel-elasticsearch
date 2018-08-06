@@ -3,7 +3,10 @@ pipeline:
   test:
     image: ethicaljobs/aphex:7.2.x
     pull: true
-    commands: [ 'composer install --prefer-dist', './vendor/bin/phpunit' ]
+    commands: [ 
+      'sleep 2'
+      'composer install --prefer-dist', './vendor/bin/phpunit' 
+    ]
     environment:
       - ES_HOST=elasticsearch:9200
 
