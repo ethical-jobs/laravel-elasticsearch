@@ -5,6 +5,7 @@
 - Rewrite: testing
 - Removed slack logging
 - Configuration refactor
+- General test suite refactor
 
 # v1.6.1
 
