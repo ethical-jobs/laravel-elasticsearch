@@ -3,6 +3,7 @@
 - Rewrite: queued indexing
 - Rewrite: repository layer
 - Rewrite: testing
+- Removed slack logging
 
 # v1.6.1
 
