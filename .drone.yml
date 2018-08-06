@@ -4,7 +4,7 @@ pipeline:
     image: ethicaljobs/aphex:7.2.x
     pull: true
     commands: [ 
-      'sleep 2'
+      'sleep 2',
       'composer install --prefer-dist', './vendor/bin/phpunit' 
     ]
     environment:
