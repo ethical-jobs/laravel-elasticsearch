@@ -71,17 +71,6 @@ class ServiceProviderTest extends \Tests\TestCase
         $indexer = $this->app->make(Indexer::class);
 
         $this->assertInstanceOf(Indexer::class, $indexer);
-    }   
-
-    /**
-     * @test
-     * @group Unit
-     */
-    public function it_registers_a_slack_logger()
-    {
-        $logger = $this->app->make(Logger::class);
-
-        $this->assertInstanceOf(Logger::class, $logger);
     }              
 
     /**

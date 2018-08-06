@@ -163,7 +163,6 @@ class EloquentHydrator implements Hydrator
                         // Unset attribute before match relation
                         unset($entity[$attribute]);
                         $relation->match([$entity], $models, $attribute);
-
                     }
                 }
             }

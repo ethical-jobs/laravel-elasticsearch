@@ -2,33 +2,26 @@
 
 namespace Tests\Integration\Repositories;
 
-use Mockery;
-use Elasticsearch\Client;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Model;
-use Tests\Fixtures\RepositoryFactory;
-use Tests\Fixtures\Models;
 use EthicalJobs\Elasticsearch\Hydrators;
-use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
+use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
+use Tests\Fixtures\Repositories\PersonRepository;
+use Tests\Helpers\Indexer;
+use Tests\Fixtures\Models;
 
 class HydratorTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
      */
     public function it_can_hydrate_results_as_models()
     {
-        $people = factory(Models\Person::class, 10)->create();
+        $people = factory(Models\Person::class, 10)->create();      
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withAnyArgs()
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
+        Indexer::all(Models\Person::class);        
 
-        $repository = RepositoryFactory::make($client, new Models\Person);
+        $repository = resolve(PersonRepository::class);
 
         $results = $repository
             ->setHydrator(new Hydrators\EloquentHydrator)
@@ -41,20 +34,15 @@ class HydratorTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_hydrate_results_as_objects_by_default()
     {
-        $people = factory(Models\Person::class, 10)->create();
+        $people = factory(Models\Person::class, 10)->create();      
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withAnyArgs()
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
+        Indexer::all(Models\Person::class);        
 
-        $repository = RepositoryFactory::make($client, new Models\Person);
+        $repository = resolve(PersonRepository::class);
 
         $results = $repository
             ->find();
@@ -66,20 +54,14 @@ class HydratorTest extends \Tests\TestCase
 
     /**
      * @test
-     * @group Unit
      */
     public function it_can_hydrate_results_as_objects()
     {
-        $people = factory(Models\Person::class, 10)->create();
+        $people = factory(Models\Person::class, 10)->create();      
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withAnyArgs()
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
+        Indexer::all(Models\Person::class);        
 
-        $repository = RepositoryFactory::make($client, new Models\Person);
+        $repository = resolve(PersonRepository::class);
 
         $results = $repository
             ->setHydrator(new Hydrators\ObjectHydrator)

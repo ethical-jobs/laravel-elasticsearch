@@ -2,62 +2,46 @@
 
 namespace Tests\Integration\Repositories;
 
-use Mockery;
-use Elasticsearch\Client;
-use Tests\Fixtures\RepositoryFactory;
+use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
+use Tests\Fixtures\Repositories\PersonRepository;
+use Tests\Helpers\Indexer;
 use Tests\Fixtures\Models;
-use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
 class FindByFieldTest extends \Tests\TestCase
 {
+    use ResetElasticsearchIndex;
+
     /**
      * @test
-     * @group Unit
      */
     public function it_can_find_by_a_field()
     {
-        $people = factory(Models\Person::class, 1)->create();
+        $donald = factory(Models\Person::class)->create([
+            'first_name' => 'Donald',
+            'last_name' => 'Trump',
+        ]);     
 
-        $searchResults = SearchResultsFactory::getSearchResults($people);
+        $barak = factory(Models\Person::class)->create([
+            'first_name' => 'Barak',
+            'last_name' => 'Obama',
+        ]);        
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withArgs(function($query) {
-                $this->assertEquals('Andrew', array_get($query, 
-                    'body.query.bool.filter.0.term.first_name'
-                ));
-                return true;
-            })
-            ->andReturn($searchResults)
-            ->getMock();            
+        Indexer::all(Models\Person::class);     
 
-        $repository = RepositoryFactory::make($client, new Models\Person);
+        $shouldBeDonald = resolve(PersonRepository::class)
+            ->findByField('first_name', $donald->first_name);
 
-        $result = $repository->findByField('first_name', 'Andrew');
+        $this->assertEquals(
+            $shouldBeDonald->first_name,
+            $donald->first_name
+        );
 
-        $this->assertEquals($result->first_name, $people->first()->first_name);
-    }    
+        $shouldBeBarak = resolve(PersonRepository::class)
+            ->findByField('last_name', $barak->last_name);
 
-    /**
-     * @test
-     * @group Unit
-     */
-    public function it_throws_http_404_exception_when_no_model_found()
-    {
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
-
-        $searchResults = SearchResultsFactory::getEmptySearchResults();
-
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withAnyArgs()
-            ->andReturn($searchResults)
-            ->getMock();            
-
-        $repository = RepositoryFactory::make($client, new Models\Person);
-
-        $repository->findByField('first_name', 'Andrew');
-    }         
+        $this->assertEquals(
+            $shouldBeBarak->last_name,
+            $barak->last_name
+        );        
+    }          
 }

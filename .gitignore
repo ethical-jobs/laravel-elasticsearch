@@ -1,9 +1,9 @@
 # paths
 vendor/
+/volumes
 node_modules/
 storage/logs/
 bootstrap/cache/
-.data
 
 # file types
 *.bak
@@ -11,9 +11,3 @@ bootstrap/cache/
 *.pid
 *.log
 .DS_Store
-
-# specific files
-.env
-!.env.testing
-invoices.csv
-testlog.out

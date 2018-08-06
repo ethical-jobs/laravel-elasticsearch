@@ -2,43 +2,137 @@
 
 namespace Tests\Integration\Repositories;
 
-use Mockery;
-use Elasticsearch\Client;
-use Tests\Fixtures\RepositoryFactory;
+use Carbon\Carbon;
+use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
+use Tests\Fixtures\Repositories\PersonRepository;
+use Tests\Helpers\Indexer;
 use Tests\Fixtures\Models;
-use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
 class OrderByTest extends \Tests\TestCase
 {
+    use ResetElasticsearchIndex;
+
     /**
      * @test
-     * @group Unit
      */
-    public function it_can_add_a_orderBy_filter()
+    public function it_can_order_by_a_date_field()
     {
-        $people = factory(Models\Person::class, 10)->create();
+        factory(Models\Person::class)->create([
+            'first_name' => 'Donald',
+            'created_at' => Carbon::now(),
+        ]);
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withArgs(function($query) {
-                $this->assertEquals(["order" => "DESC"], array_get($query, 
-                    'body.sort.0.age'
-                ));
-                $this->assertEquals(["order" => "DESC"], array_get($query, 
-                    'body.sort.1._score'
-                ));                
-                return true;
-            })
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
+        factory(Models\Person::class)->create([
+            'first_name' => 'Barak',
+            'created_at' => Carbon::now()->subDays(1),
+        ]);        
 
-        $repository = RepositoryFactory::make($client, new Models\Person);   
+        factory(Models\Person::class)->create([
+            'first_name' => 'George',
+            'created_at' => Carbon::now()->subDays(2),
+        ]);        
 
-        $result = $repository
+        factory(Models\Person::class)->create([
+            'first_name' => 'Bill',
+            'created_at' => Carbon::now()->subDays(3),
+        ]);                
+
+        Indexer::all(Models\Person::class);     
+
+        $presidents = resolve(PersonRepository::class)
+            ->orderBy('created_at', 'DESC')
+            ->find();  
+
+        $this->assertEquals($presidents->pluck('first_name')->toArray(), [
+            'Donald', 'Barak', 'George', 'Bill'
+        ]);
+
+        $presidents = resolve(PersonRepository::class)
+            ->orderBy('created_at', 'ASC')
+            ->find();  
+
+        $this->assertEquals($presidents->pluck('first_name')->toArray(), [
+            'Bill', 'George', 'Barak', 'Donald'
+        ]);       
+    }    
+    
+    /**
+     * @test
+     */
+    public function it_can_order_by_a_numeric_field()
+    {
+        factory(Models\Person::class)->create([
+            'first_name' => 'Barak',
+            'age' => 56,
+        ]);   
+
+        factory(Models\Person::class)->create([
+            'first_name' => 'Bill',
+            'age' => 71,
+        ]);            
+
+        factory(Models\Person::class)->create([
+            'first_name' => 'Donald',
+            'age' => 72,
+        ]);     
+
+        factory(Models\Person::class)->create([
+            'first_name' => 'George',
+            'age' => 73,
+        ]);            
+
+        Indexer::all(Models\Person::class);     
+
+        $presidents = resolve(PersonRepository::class)
+            ->orderBy('age', 'ASC')
+            ->find();  
+
+        $this->assertEquals($presidents->pluck('first_name')->toArray(), [
+            'Barak', 'Bill', 'Donald', 'George'
+        ]);
+
+        $presidents = resolve(PersonRepository::class)
             ->orderBy('age', 'DESC')
-            ->find();
+            ->find();  
 
-        $this->assertEquals(10, $result->count());        
-    }                  
+        $this->assertEquals($presidents->pluck('first_name')->toArray(), [
+            'George', 'Donald', 'Bill', 'Barak'
+        ]);       
+    }  
+    
+    /**
+     * @test
+     */
+    public function it_orders_by_ascending_defaultly()
+    {
+        factory(Models\Person::class)->create([
+            'first_name' => 'Barak',
+            'age' => 56,
+        ]);   
+
+        factory(Models\Person::class)->create([
+            'first_name' => 'Bill',
+            'age' => 71,
+        ]);            
+
+        factory(Models\Person::class)->create([
+            'first_name' => 'Donald',
+            'age' => 72,
+        ]);     
+
+        factory(Models\Person::class)->create([
+            'first_name' => 'George',
+            'age' => 73,
+        ]);            
+
+        Indexer::all(Models\Person::class);     
+
+        $presidents = resolve(PersonRepository::class)
+            ->orderBy('age')
+            ->find();  
+
+        $this->assertEquals($presidents->pluck('first_name')->toArray(), [
+            'Barak', 'Bill', 'Donald', 'George'
+        ]);      
+    }       
 }

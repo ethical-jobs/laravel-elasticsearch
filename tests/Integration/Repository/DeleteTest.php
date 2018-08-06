@@ -8,7 +8,7 @@ class DeleteTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_delete_an_entity_and_return_it()
     {

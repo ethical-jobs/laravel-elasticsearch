@@ -4,15 +4,15 @@ namespace Tests\Integration\Repositories;
 
 use Mockery;
 use Elasticsearch\Client;
-use Tests\Fixtures\RepositoryFactory;
-use Tests\Fixtures\Models;
+use ONGR\ElasticsearchDSL\Search;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
+use Tests\Fixtures\Repositories\PersonRepository;
+use Tests\Fixtures\Models;
 
 class FindTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
      */
     public function it_searches_the_correct_index()
     {
@@ -22,20 +22,19 @@ class FindTest extends \Tests\TestCase
             ->shouldReceive('search')
             ->once()
             ->withArgs(function($query) {
-                $this->assertEquals('test-index', $query['index']);
+                $this->assertEquals('testing', $query['index']);
                 return true;
             })
             ->andReturn(SearchResultsFactory::getSearchResults($people))
             ->getMock();       
 
-        $repository = RepositoryFactory::make($client, new Models\Person);
+        $repository = new PersonRepository(new Search, $client);
 
         $results = $repository->find();
     }      
 
     /**
      * @test
-     * @group Unit
      */
     public function it_searches_the_correct_document_type()
     {
@@ -51,30 +50,8 @@ class FindTest extends \Tests\TestCase
             ->andReturn(SearchResultsFactory::getSearchResults($people))
             ->getMock();       
 
-        $repository = RepositoryFactory::make($client, new Models\Person);  
+        $repository = new PersonRepository(new Search, $client); 
 
         $results = $repository->find();
-    }    
-
-    /**
-     * @test
-     * @group Unit
-     */
-    public function it_throws_excepion_on_empty_results()
-    {
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
-
-        $searchResults = SearchResultsFactory::getEmptySearchResults();
-
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withAnyArgs()
-            ->andReturn($searchResults)
-            ->getMock();       
-
-        $repository = RepositoryFactory::make($client, new Models\Person);    
-
-        $results = $repository->find();
-    }                        
+    }                       
 }

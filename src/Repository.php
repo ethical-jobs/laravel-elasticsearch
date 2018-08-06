@@ -8,12 +8,14 @@ use ONGR\ElasticsearchDSL\Search;
 use ONGR\ElasticsearchDSL\Sort\FieldSort;
 use ONGR\ElasticsearchDSL\Query\TermLevel;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
+use ONGR\ElasticsearchDSL\Query\FullText;
+use ONGR\ElasticsearchDSL\Query\Joining;
 use EthicalJobs\Storage\Contracts;
 use EthicalJobs\Storage\HasCriteria;
 use EthicalJobs\Storage\CriteriaCollection;
 use EthicalJobs\Storage\HydratesResults;
 use EthicalJobs\Elasticsearch\Hydrators\ObjectHydrator;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use EthicalJobs\Elasticsearch\Utilities;
 
 /**
  * Elasticsearch repository
@@ -80,6 +82,8 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
         $this->criteria = new CriteriaCollection;
 
         $this->setHydrator(new ObjectHydrator);
+
+        $this->limit(10000); // ES max
     }
 
     /**
@@ -109,7 +113,7 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
 
         $this->search->addQuery($query, BoolQuery::FILTER);        
 
-        return $this->find()->first();
+        return $this->limit(1)->find()->first();
     }  
 
     /**
@@ -119,27 +123,30 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
     {
         $query = new TermLevel\TermQuery($field, $value);
 
-        $this->search->addQuery($query, BoolQuery::FILTER);        
+        $this->search->addQuery($query);        
 
-        return $this->find()->first();
+        return $this->limit(1)->find()->first();
     }     
 
     /**
      * {@inheritdoc}
      */
-    public function where(string $field, $operator, $value = null): Contracts\Repository
+    public function where(string $field, $operator, $value = null) : Contracts\Repository
     {
+        $operator = Utilities::translateOperator($operator);
+
         switch ($operator) {
-            case '<=':
-            case '>=':
-            case '<':
-            case '>':
+            case 'lte':
+            case 'gte':
+            case 'lt':
+            case 'gt':
                 $query = new TermLevel\RangeQuery($field, [$operator => $value]);
                 $bool = BoolQuery::FILTER;
                 break;
             case 'like':
-                $query = new TermLevel\WildcardQuery($field, str_replace('%', '*', $value));
-                $bool = BoolQuery::FILTER;
+                $query = new FullText\QueryStringQuery(str_replace('%', '*', $value));
+                $query->addParameter('default_field', $field);
+                $bool = null;
                 break;    
             case '!=':
                 $query = new TermLevel\TermQuery($field, $value);
@@ -152,7 +159,11 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
                 break;                                             
         }
 
-        $this->search->addQuery($query, $bool); 
+        if ($bool) {
+            $this->search->addQuery($query, $bool); 
+        } else {
+            $this->search->addQuery($query); 
+        }
 
         return $this;
     }  
@@ -160,7 +171,7 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
     /**
      * {@inheritdoc}
      */
-    public function whereIn(string $field, array $values): Contracts\Repository
+    public function whereIn(string $field, array $values) : Contracts\Repository
     {
         $query = new TermLevel\TermsQuery($field, $values);
 
@@ -172,7 +183,21 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
     /**
      * {@inheritdoc}
      */
-    public function orderBy(string $field, $direction = 'asc'): Contracts\Repository
+    public function whereHasIn(string $field, array $values) : Contracts\Repository
+    {  
+        $fields = explode('.', $field);
+
+        $query = new TermLevel\TermsQuery($field, $values);
+
+        $this->search->addQuery($query, BoolQuery::FILTER);  
+        
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function orderBy(string $field, $direction = 'asc') : Contracts\Repository
     {
         $this->search->addSort(new FieldSort($field, $direction));
 
@@ -184,28 +209,43 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
     /**
      * {@inheritdoc}
      */
-    public function limit(int $limit): Contracts\Repository
+    public function limit(int $limit) : Contracts\Repository
     {
         $this->search->setSize($limit);
 
         return $this;
-    }                      
+    }    
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function search(string $term = '') : Contracts\Repository
+    {
+        $query = new FullText\SimpleQueryStringQuery($term, [
+            'fields' => ['_all'],
+            'default_operator' => 'and',
+        ]);
+
+        $this->search->addQuery($query);
+
+        return $this;
+    }        
 
     /**
      * {@inheritdoc}
      */
-    public function find(): iterable
+    public function find() : iterable
     {
+        // dd($this->search->toArray());
+
+        $this->applyCriteria();
+
         $response = $this->client->search([
             'index' => $this->indexName,
             'type'  => $this->indexable->getDocumentType(),
             'body'  => $this->search->toArray(),
         ]);
-
-        if ($response['hits']['total'] < 1) {
-            throw new NotFoundHttpException;
-        }
-
+        
         return $this->getHydrator()
             ->setIndexable($this->indexable)
             ->hydrateCollection($response);
