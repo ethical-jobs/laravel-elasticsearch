@@ -10,25 +10,26 @@ class Family extends Model implements Indexable
 {
     use Document;
     
-    public function vehicles()
+    public function vehicle()
     {
         return $this->hasOne(Vehicle::class);
     }
 
     public function members()
     {
-        return $this->hasOne(Person::class);
+        return $this->hasMany(Person::class);
     }     
 
     public function getDocumentRelations()
     {
-        return ['vehicles','members'];
+        return ['vehicle','members'];
     }     
 
     public function getDocumentMappings()
     {
         return [
             'surname' => ['type' => 'text'],
+            'members' => ['type' => 'object'],
         ];
     } 
 }

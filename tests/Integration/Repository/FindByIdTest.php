@@ -2,62 +2,46 @@
 
 namespace Tests\Integration\Repositories;
 
-use Mockery;
-use Elasticsearch\Client;
-use Tests\Fixtures\RepositoryFactory;
+use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
+use Tests\Fixtures\Repositories\PersonRepository;
+use Tests\Helpers\Indexer;
 use Tests\Fixtures\Models;
-use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
 class FindByIdTest extends \Tests\TestCase
 {
-    /**
-     * @test
-     * @group Unit
-     */
-    public function it_can_find_by_id()
-    {
-        $people = factory(Models\Person::class, 1)->create();
-
-        $searchResults = SearchResultsFactory::getSearchResults($people);
-
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withArgs(function($query) use ($people) {
-                $this->assertEquals($people->first()->id, array_get($query, 
-                    'body.query.bool.filter.0.term.id'
-                ));
-                return true;
-            })
-            ->andReturn($searchResults)
-            ->getMock();            
-
-        $repository = RepositoryFactory::make($client, new Models\Person);
-
-        $result = $repository->findById($people->first()->id);
-
-        $this->assertEquals($result->id, $people->first()->id);
-    }  
+    use ResetElasticsearchIndex;
 
     /**
      * @test
-     * @group Unit
      */
-    public function it_throws_http_404_exception_when_no_model_found()
+    public function it_can_find_by_sql_id()
     {
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
+        $donald = factory(Models\Person::class)->create([
+            'first_name' => 'Donald',
+            'last_name' => 'Trump',
+        ]);     
 
-        $searchResults = SearchResultsFactory::getEmptySearchResults();
+        $barak = factory(Models\Person::class)->create([
+            'first_name' => 'Barak',
+            'last_name' => 'Obama',
+        ]);        
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withAnyArgs()
-            ->andReturn($searchResults)
-            ->getMock();            
+        Indexer::all(Models\Person::class);     
 
-        $repository = RepositoryFactory::make($client, new Models\Person);
+        $shouldBeDonald = resolve(PersonRepository::class)
+            ->findById($donald->id);
 
-        $repository->findByField('first_name', 'Andrew');
-    }         
+        $this->assertEquals(
+            $shouldBeDonald->first_name,
+            $donald->first_name
+        );
+
+        $shouldBeBarak = resolve(PersonRepository::class)
+            ->findById($barak->id);
+
+        $this->assertEquals(
+            $shouldBeBarak->first_name,
+            $barak->first_name
+        );        
+    }          
 }

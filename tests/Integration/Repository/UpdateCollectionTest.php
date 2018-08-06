@@ -8,7 +8,7 @@ class UpdateCollectionTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Unit
+     * @group elasticsearch
      */
     public function it_can_update_an_entity_and_return_it()
     {

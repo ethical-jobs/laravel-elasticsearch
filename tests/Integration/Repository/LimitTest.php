@@ -2,40 +2,51 @@
 
 namespace Tests\Integration\Repositories;
 
-use Mockery;
-use Elasticsearch\Client;
-use Tests\Fixtures\RepositoryFactory;
+use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
+use Tests\Fixtures\Repositories\PersonRepository;
+use Tests\Helpers\Indexer;
 use Tests\Fixtures\Models;
-use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
 class LimitTest extends \Tests\TestCase
 {
+    use ResetElasticsearchIndex;
+
     /**
      * @test
-     * @group Unit
      */
-    public function it_can_add_a_limit()
+    public function it_can_limit_results()
     {
-        $people = factory(Models\Person::class, 10)->create();
+        factory(Models\Person::class, 30)->create();      
 
-        $client = Mockery::mock(Client::class)
-            ->shouldReceive('search')
-            ->once()
-            ->withArgs(function($query) {
-                $this->assertEquals(17, array_get($query, 
-                    'body.size'
-                ));     
-                return true;
-            })
-            ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
+        Indexer::all(Models\Person::class);     
 
-        $repository = RepositoryFactory::make($client, new Models\Person);
-
-        $result = $repository
-            ->limit(17)
+        $people = resolve(PersonRepository::class)
+            ->limit(20)
             ->find();
 
-        $this->assertEquals(10, $result->count());        
-    }                  
+        $this->assertEquals(20, $people->count());           
+    } 
+    
+    /**
+     * @test
+     */
+    public function it_limit_is_10_thousand_by_default()
+    {
+        // We dont want to populate 10,000 models as thats extreme 
+        // so lets just do a large-ish amount
+        //
+        // @todo Write a trait called HasSearchParams that has methods:
+        // - getParams
+        // - setParams
+        // - resetParams (resets search to defaults e.g limit and clears (see construct))
+
+        factory(Models\Person::class, 3000)->create();      
+
+        Indexer::all(Models\Person::class);     
+
+        $people = resolve(PersonRepository::class)
+            ->find();
+
+        $this->assertEquals(3000, $people->count());           
+    }      
 }

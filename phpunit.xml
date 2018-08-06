@@ -8,6 +8,7 @@
          convertWarningsToExceptions="true"
          processIsolation="false"
          stopOnFailure="false"
+         failOnRisky="true"
          syntaxCheck="false"
          bootstrap="vendor/autoload.php"
 >

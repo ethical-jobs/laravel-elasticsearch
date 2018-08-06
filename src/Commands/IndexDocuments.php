@@ -1,11 +1,12 @@
 <?php
 
-namespace EthicalJobs\Elasticsearch\Console;
+namespace EthicalJobs\Elasticsearch\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use EthicalJobs\Elasticsearch\Indexing\IndexQuery;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
+use EthicalJobs\Elasticsearch\Utilities;
 use EthicalJobs\Elasticsearch\Indexable;
 use EthicalJobs\Elasticsearch\Index;
 
@@ -24,7 +25,6 @@ class IndexDocuments extends Command
      */
     protected $signature = 'ej:es:index
                             {--chunk-size=250 : How many documents to index at once}
-                            {--queue : Process the indexing of each indexable in a seperate process}
                             {--indexables=* : An array of indexables to index (none == all)}';
 
     /**
@@ -47,13 +47,6 @@ class IndexDocuments extends Command
      * @param \App\Services\Elasticsearch\Indexing\Indexer
      */
     private $indexer;
-
-    /**
-     * Resources to be indexed
-     *
-     * @param Array
-     */
-    private $indexables = [];
 
     /**
      * Constructor
@@ -97,13 +90,13 @@ class IndexDocuments extends Command
 
         Cache::put('es:es:indexing', true, 60);
 
-        $indexQuery = new IndexQuery(new $indexable, $this->option('chunk-size'));
+        $query = $indexable::query();
 
-        if ($this->option('queue')) {
-            $this->indexer->queueQuery($indexQuery);
-        } else {
-            $this->indexer->indexQuery($indexQuery);
+        if (Utilities::isSoftDeletable($indexable)) {
+            $query->withTrashed();
         }
+
+        $this->indexer->queue($query, $this->option('chunk-size'));
 
         Cache::forget('es:es:indexing');
     }       

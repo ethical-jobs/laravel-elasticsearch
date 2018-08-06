@@ -1,3 +1,11 @@
+# v2.0.0
+
+- Rewrite: queued indexing
+- Rewrite: repository layer
+- Rewrite: testing
+- Removed slack logging
+- Configuration refactor
+
 # v1.6.1
 
 - Lock file updates for dependancies

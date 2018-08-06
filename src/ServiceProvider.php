@@ -2,15 +2,11 @@
 
 namespace EthicalJobs\Elasticsearch;
 
-use Maknz\Slack\Client as SlackClient;
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
-use Illuminate\Support\Facades\Event;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
-use EthicalJobs\Elasticsearch\Indexing\Logging;
 use EthicalJobs\Elasticsearch\IndexSettings;
-use EthicalJobs\Elasticsearch\Console;
+use EthicalJobs\Elasticsearch\Commands;
 use EthicalJobs\Elasticsearch\Index;
 
 /**
@@ -57,7 +53,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
         $this->registerIndexSingleton();
 
-        $this->registerDocumentIndexing();
+        $this->registerDocumentIndexer();
     }
 
     /**
@@ -87,7 +83,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     }
 
     /**
-     * Register index instance
+     * Register default index instance
      *
      * @return void
      */
@@ -108,34 +104,15 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     }   
 
     /**
-     * Register index logging services
+     * Register indexing services
      *
      * @return void
      */
-    protected function registerDocumentIndexing(): void
+    protected function registerDocumentIndexer(): void
     {
-        $this->app->bind(Logging\ConsoleChannel::class, function ($app) {
-            return new Logging\ConsoleChannel(new ConsoleOutput);
-        });        
-
-        $this->app->bind(Logging\SlackChannel::class, function ($app) {
-            return new Logging\SlackChannel(new SlackClient(
-                config('elasticsearch.logging.slack.webhook'), 
-                config('elasticsearch.logging.slack')
-            ));
-        });
-
-        $this->app->bind(Logging\Logger::class, function ($app) {
-            return new Logging\Logger([
-                $app[Logging\SlackChannel::class],
-                $app[Logging\ConsoleChannel::class],
-            ]);
-        });
-
         $this->app->bind(Indexer::class, function ($app) {
             return new Indexer(
                 $app[Client::class],
-                $app[Logging\Logger::class],
                 $app[Index::class]->getIndexName()
             );
         });
@@ -166,10 +143,10 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                Console\CreateIndex::class,
-                Console\DeleteIndex::class,
-                Console\FlushIndex::class,
-                Console\IndexDocuments::class,
+                Commands\CreateIndex::class,
+                Commands\DeleteIndex::class,
+                Commands\FlushIndex::class,
+                Commands\IndexDocuments::class,
             ]);
         }
     }        

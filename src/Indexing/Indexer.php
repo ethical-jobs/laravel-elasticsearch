@@ -3,13 +3,9 @@
 namespace EthicalJobs\Elasticsearch\Indexing;
 
 use Elasticsearch\Client;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
-use EthicalJobs\Elasticsearch\Exceptions\IndexingException;
-use EthicalJobs\Elasticsearch\Indexing\Logging\Logger;
+use Illuminate\Database\Eloquent\Collection;
 use EthicalJobs\Elasticsearch\Indexable;
-use EthicalJobs\Elasticsearch\Utilities;
-use EthicalJobs\Elasticsearch\Index;
 
 /**
  * Indexes documents in elasticsearch
@@ -34,35 +30,40 @@ class Indexer
     private $indexName;
 
     /**
-     * Slack logging instance
+     * Wait for documents to be indexed and available
      *
-     * @param \EthicalJobs\Elasticsearch\Indexing\Logger
+     * @param bool
      */
-    private $logger;    
+    private $synchronous = false;     
 
     /**
      * Constructor
      *
      * @param \Elasticsearch\Client $client
-     * @param \EthicalJobs\Elasticsearch\Indexing\Logging\Logger $logger
      * @param string $indexName
      * @return void
      */
-    public function __construct(Client $client, Logger $logger, string $indexName)
+    public function __construct(Client $client, string $indexName)
     {
-        \DB::disableQueryLog();
-
         $this->client = $client;
-
-        $this->logger = $logger;
 
         $this->indexName = $indexName;
     }
 
     /**
+     * Enables "blocking" synchronous document indexing
+     *
+     * @return void
+     */
+    public function synchronous() : void
+    {
+        $this->synchronous = true;
+    }
+
+    /**
      * Indexes a indexable instance
      *
-     * @param \EthicalJobs\Elasticsearch\Indexabl $indexable
+     * @param Indexable $indexable
      * @return array
      */
     public function indexDocument(Indexable $indexable): array
@@ -71,6 +72,7 @@ class Indexer
             'index'     => $this->indexName,
             'id'        => $indexable->getDocumentKey(),
             'type'      => $indexable->getDocumentType(),
+            'refresh'   => $this->synchronous ? 'wait_for' : false,
             'body'      => $indexable->getDocumentTree(),
         ]);
     }
@@ -78,7 +80,7 @@ class Indexer
     /**
      * Deletes a indexable instance
      *
-     * @param \EthicalJobs\Elasticsearch\Indexabl $indexable
+     * @param \EthicalJobs\Elasticsearch\Indexable $indexable
      * @return array
      */
     public function deleteDocument(Indexable $indexable): array
@@ -87,63 +89,30 @@ class Indexer
             'index'     => $this->indexName,
             'id'        => $indexable->getDocumentKey(),
             'type'      => $indexable->getDocumentType(),
+            'refresh'   => $this->synchronous ? 'wait_for' : false,
         ]);
     }    
 
     /**
-     * Indexes all items of an indexable
+     * Indexes a collection of documents
      *
-     * @param \EthicalJobs\Elasticsearch\Indexing\IndexQuery $indexQuery
-     * @return void
-     */
-    public function indexQuery(IndexQuery $indexQuery): void
-    {
-        $this->logger->join($indexQuery);
-
-        $indexQuery->chunk(function($chunk, $index) use($indexQuery) {
-
-            $response = $this->bulkRequest($chunk);
-
-            if (Utilities::isResponseValid($response) === false) {
-                $this->logger->log('Indexing error', Utilities::getResponseErrors($response));
-                throw new IndexingException('Invalid request parameters');
-            }
-        });
-
-        $this->logger->complete($indexQuery);
-    } 
-
-    /**
-     * Queues index queries into seperate processes
-     *
-     * @param \EthicalJobs\Elasticsearch\Indexing\IndexQuery $indexQuery
-     * @return void
-     */
-    public function queueQuery(IndexQuery $indexQuery): void
-    {
-        $this->logger->start($indexQuery);
-
-        ProcessIndexQuery::dispatch($indexQuery);
-    }     
-
-    /**
-     * Creates a request from a collection of indexables
-     *
-     * @param \Illuminate\Support\Collection $collection
-     * @param Bool $isDeleteRequest
+     * @param Collection $collection
      * @return array
      */
-    protected function bulkRequest(Collection $collection): array
+    public function indexCollection(Collection $collection) : array
     {
-        $params = [];
+        $params = [
+            'refresh' => $this->synchronous ? 'wait_for' : false,
+            'body' => [],
+        ];
 
         foreach ($collection as $indexable) {
 
             $params['body'][] = [
                 'index' => [
                     '_index' => $this->indexName,
-                    '_id'    => $indexable->getDocumentKey(),
-                    '_type'  => $indexable->getDocumentType(),
+                    '_id' => $indexable->getDocumentKey(),
+                    '_type' => $indexable->getDocumentType(),
                 ],
             ];
 
@@ -152,4 +121,18 @@ class Indexer
 
         return $this->client->bulk($params);
     }
+
+    /**
+     * Queue the indexing of documents
+     *
+     * @param Builder $query
+     * @param integer $chunks
+     * @return void
+     */
+    public function queue(Builder $query, int $chunks = 100) : void
+    {
+        $query->chunk($chunks, function ($documents) {
+            IndexDocuments::dispatch($documents);
+        });
+    } 
 }

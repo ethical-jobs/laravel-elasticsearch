@@ -3,7 +3,12 @@ pipeline:
   test:
     image: ethicaljobs/aphex:7.2.x
     pull: true
-    commands: [ 'composer install --prefer-dist', './vendor/bin/phpunit' ]
+    commands: [ 
+      'sleep 2'
+      'composer install --prefer-dist', './vendor/bin/phpunit' 
+    ]
+    environment:
+      - ES_HOST=elasticsearch:9200
 
   publish:
     image: byrnedo/alpine-curl
@@ -16,3 +21,7 @@ pipeline:
     image: plugins/slack
     webhook: https://hooks.slack.com/services/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
     channel: deployments
+
+services:
+  elasticsearch:
+    image: elasticsearch:5-alpine  
