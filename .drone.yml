@@ -4,6 +4,8 @@ pipeline:
     image: ethicaljobs/aphex:7.2.x
     pull: true
     commands: [ 'composer install --prefer-dist', './vendor/bin/phpunit' ]
+    environment:
+      - ES_HOST=elasticsearch:9200
 
   publish:
     image: byrnedo/alpine-curl
@@ -18,5 +20,5 @@ pipeline:
     channel: deployments
 
 services:
-  redis:
+  elasticsearch:
     image: elasticsearch:5-alpine  

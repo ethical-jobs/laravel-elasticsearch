@@ -5,7 +5,6 @@ namespace Tests\Integration\Indexing\Indexer;
 use Mockery;
 use Elasticsearch\Client;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
-use EthicalJobs\Elasticsearch\Indexing\Logging\Logger;
 use Tests\Fixtures\Models\Person;
 
 class IndexDocumentTest extends \Tests\TestCase
@@ -16,8 +15,6 @@ class IndexDocumentTest extends \Tests\TestCase
      */
     public function it_indexes_the_document_and_returns_the_response()
     {
- 		$logger = Mockery::mock(Logger::class)->shouldIgnoreMissing();
-
  		$indexName = 'test-index';
 
  		$person = factory(Person::class)->create();
@@ -37,7 +34,7 @@ class IndexDocumentTest extends \Tests\TestCase
  			->andReturn(['hits' => 1])
  			->getMock();
 
- 		$indexer = new Indexer($client, $logger, $indexName);
+ 		$indexer = new Indexer($client, $indexName);
 
  		$response = $indexer->indexDocument($person);
 

@@ -25,8 +25,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 
 		$this->withFactories(__DIR__.'/../database/factories');
 		
-		
-
 	    IndexableObservers::withoutObservers();
 	}	
 

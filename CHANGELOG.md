@@ -1,3 +1,9 @@
+# v2.0.0
+
+- Rewrite: queued indexing
+- Rewrite: repository layer
+- Rewrite: testing
+
 # v1.6.1
 
 - Lock file updates for dependancies
