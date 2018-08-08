@@ -6,7 +6,6 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use EthicalJobs\Elasticsearch\Indexing\IndexQuery;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
-use EthicalJobs\Elasticsearch\Utilities;
 use EthicalJobs\Elasticsearch\Indexable;
 use EthicalJobs\Elasticsearch\Index;
 
@@ -90,11 +89,7 @@ class IndexDocuments extends Command
 
         Cache::put('es:es:indexing', true, 60);
 
-        $query = $indexable::query();
-
-        if (Utilities::isSoftDeletable($indexable)) {
-            $query->withTrashed();
-        }
+        $query = (new $indexable)->getIndexingQuery();
 
         $this->indexer->queue($query, $this->option('chunk-size'));
 

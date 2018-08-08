@@ -2,9 +2,10 @@
 
 namespace EthicalJobs\Elasticsearch\Indexing;
 
-use Elasticsearch\Client;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use EthicalJobs\Elasticsearch\Contracts\HasElasticsearch;
+use EthicalJobs\Elasticsearch\ElasticsearchClient;
 use EthicalJobs\Elasticsearch\Indexable;
 
 /**
@@ -13,21 +14,9 @@ use EthicalJobs\Elasticsearch\Indexable;
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
 
-class Indexer
+class Indexer implements HasElasticsearch
 {
-    /**
-     * Elastic search client
-     *
-     * @param \Elasticsearch\Client
-     */
-    private $client;
-
-    /**
-     * Elastic search index name
-     *
-     * @param string
-     */
-    private $indexName;
+    use ElasticsearchClient;
 
     /**
      * Wait for documents to be indexed and available
@@ -35,20 +24,6 @@ class Indexer
      * @param bool
      */
     private $synchronous = false;     
-
-    /**
-     * Constructor
-     *
-     * @param \Elasticsearch\Client $client
-     * @param string $indexName
-     * @return void
-     */
-    public function __construct(Client $client, string $indexName)
-    {
-        $this->client = $client;
-
-        $this->indexName = $indexName;
-    }
 
     /**
      * Enables "blocking" synchronous document indexing
@@ -68,7 +43,7 @@ class Indexer
      */
     public function indexDocument(Indexable $indexable): array
     {
-        return $this->client->index([
+        return $this->getElasticsearchClient()->index([
             'index'     => $this->indexName,
             'id'        => $indexable->getDocumentKey(),
             'type'      => $indexable->getDocumentType(),
@@ -85,7 +60,7 @@ class Indexer
      */
     public function deleteDocument(Indexable $indexable): array
     {
-        return $this->client->delete([
+        return $this->getElasticsearchClient()->delete([
             'index'     => $this->indexName,
             'id'        => $indexable->getDocumentKey(),
             'type'      => $indexable->getDocumentType(),
@@ -119,7 +94,7 @@ class Indexer
             $params['body'][] = $indexable->getDocumentTree();
         }
 
-        return $this->client->bulk($params);
+        return $this->getElasticsearchClient()->bulk($params);
     }
 
     /**

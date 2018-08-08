@@ -3,7 +3,7 @@
 namespace EthicalJobs\Elasticsearch;
 
 /**
- * Elasticsearch utility class
+ * Static utility class
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
@@ -74,5 +74,42 @@ class Utilities
         }
 
         return $operator;
+    }   
+    
+    /**
+     * Truth test if entity is indaxable
+     *
+     * @param Model $entity
+     * @return bool
+     */
+    public static function isIndexable(Model $entity) : bool
+    {
+        if (in_array(get_class($entity), static::getIndexables())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the indexable entities
+     *
+     * @return array
+     */
+    public static function getIndexables() : array
+    {
+        return static::config('indexables', []);
     }     
+
+    /**
+     * Returns config setting(s)
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public static function config(string $key = '', $default)
+    {
+        return config("elasticsearch.$key", $default);
+    }      
 }

@@ -2,7 +2,6 @@
 
 namespace EthicalJobs\Elasticsearch;
 
-use Elasticsearch\Client;
 use Illuminate\Database\Eloquent\Model;
 use ONGR\ElasticsearchDSL\Search;
 use ONGR\ElasticsearchDSL\Sort\FieldSort;
@@ -14,6 +13,7 @@ use EthicalJobs\Storage\Contracts;
 use EthicalJobs\Storage\HasCriteria;
 use EthicalJobs\Storage\CriteriaCollection;
 use EthicalJobs\Storage\HydratesResults;
+use EthicalJobs\Elasticsearch\Contracts\HasElasticSearch;
 use EthicalJobs\Elasticsearch\Hydrators\ObjectHydrator;
 use EthicalJobs\Elasticsearch\Utilities;
 
@@ -23,35 +23,23 @@ use EthicalJobs\Elasticsearch\Utilities;
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
 
-class Repository implements Contracts\Repository, Contracts\HasCriteria, Contracts\HydratesResults
+class Repository implements HasElasticSearch, Contracts\Repository, Contracts\HasCriteria, Contracts\HydratesResults
 {
-    use HasCriteria, HydratesResults;
-
-    /**
-     * Elasticsearch client
-     * 
-     * @var Elasticsearch\Client
-     */
-    protected $client;
-
-    /**
-     * Name of the working Elasticsearch index
-     * 
-     * @var string
-     */    
-    protected $indexName;
+    use ElasticsearchClient, 
+        HasCriteria, 
+        HydratesResults;
     
     /**
      * Indexable model 
      * 
-     * @var EthicalJobs\Elasticsearch\Indexable
+     * @var Indexable
      */    
     protected $indexable;
     
     /**
      * Elasticsearch query DSL
      * 
-     * @var ONGR\ElasticsearchDSL\Search
+     * @var Search
      */    
     protected $search;
 
@@ -60,24 +48,13 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
      *
      * @param \EthicalJobs\Elasticsearch\Indexable $indexable
      * @param \ONGR\ElasticsearchDSL\Search $search
-     * @param \Elasticsearch\Client $client
-     * @param string $indexName
      * @return void
      */
-    public function __construct(
-        Indexable $indexable, 
-        Search $search, 
-        Client $client, 
-        string $indexName = 'test-index'
-    )
+    public function __construct(Indexable $indexable, Search $search)
     {
         $this->indexable = $indexable;
 
         $this->search = $search;
-
-        $this->indexName = $indexName;
-
-        $this->setStorageEngine($client);
 
         $this->criteria = new CriteriaCollection;
 
@@ -89,9 +66,9 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
     /**
      * {@inheritdoc}
      */
-    public function getStorageEngine()
+    public function getElasticsearchClient()
     {    
-        return $this->client;
+        return $this->getElasticSearchClient();
     }
 
     /**
@@ -99,7 +76,7 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
      */
     public function setStorageEngine($storage)
     {    
-        $this->client = $storage;
+        $this->setElasticsearchClient($storage);
 
         return $this;
     }        
@@ -240,7 +217,7 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
 
         $this->applyCriteria();
 
-        $response = $this->client->search([
+        $response = $this->getElasticsearchClient()->search([
             'index' => $this->indexName,
             'type'  => $this->indexable->getDocumentType(),
             'body'  => $this->search->toArray(),
@@ -256,7 +233,7 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
      */
     public function update($id, array $attributes)
     {
-        throw new \Exception('Use EthicalJobs\Elasticsearch\Indexing service.');
+        throw new \Exception('Use EthicalJobs\Elasticsearch\Indexing\Indexer service.');
     }        
 
     /**
@@ -264,7 +241,7 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
      */
     public function updateCollection(iterable $entities)
     {
-        throw new \Exception('Use EthicalJobs\Elasticsearch\Indexing service.');
+        throw new \Exception('Use EthicalJobs\Elasticsearch\Indexing\Indexer service.');
     }
 
     /**
@@ -272,6 +249,6 @@ class Repository implements Contracts\Repository, Contracts\HasCriteria, Contrac
      */
     public function delete($id)
     {
-        throw new \Exception('Use EthicalJobs\Elasticsearch\Indexing service.');
+        throw new \Exception('Use EthicalJobs\Elasticsearch\Indexing\Indexer service.');
     }       
 }

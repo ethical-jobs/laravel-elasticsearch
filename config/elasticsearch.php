@@ -11,11 +11,12 @@ return [
     |
     */    
 
-    'defaultConnection' => 'default',
-
+    'default' => 'default',
+    
     'connections' => [
         'default' => [
             'hosts'             => [ env('ES_HOST', 'localhost:9200') ],
+            'retries'           => 1,
             'sslVerification'   => null,
             'logging'           => false,
         ],
@@ -26,12 +27,12 @@ return [
     | Index name
     |--------------------------------------------------------------------------
     |
-    | Name of the primary Elasticsearch index
-    | at present the package only supports a single index
+    | Name of the primary Elasticsearch index.
+    | At present the package only supports a single index.
     |
     */
    
-	'index'	=> 'my-index',
+	'index'	=> env('ES_INDEX', 'my-index'),
 
     /*
     |--------------------------------------------------------------------------
