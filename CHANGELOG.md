@@ -1,3 +1,7 @@
+# v2.1.3
+
+- Interface with incorrect namespace
+
 # v2.1.2
 
 - Simplified repository constructor requirements
