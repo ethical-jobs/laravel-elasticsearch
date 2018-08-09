@@ -15,7 +15,7 @@ use EthicalJobs\Storage\HasCriteria;
 use EthicalJobs\Storage\CriteriaCollection;
 use EthicalJobs\Storage\HydratesResults;
 use EthicalJobs\Elasticsearch\Contracts\Indexable;
-use EthicalJobs\Elasticsearch\Contracts\HasElasticSearch;
+use EthicalJobs\Elasticsearch\Contracts\HasElasticsearch;
 use EthicalJobs\Elasticsearch\Hydrators\ObjectHydrator;
 use EthicalJobs\Elasticsearch\Utilities;
 
@@ -25,7 +25,7 @@ use EthicalJobs\Elasticsearch\Utilities;
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
 
-class Repository implements HasElasticSearch, Contracts\Repository, Contracts\HasCriteria, Contracts\HydratesResults
+class Repository implements HasElasticsearch, Contracts\Repository, Contracts\HasCriteria, Contracts\HydratesResults
 {
     use ElasticsearchClient, HasCriteria, HydratesResults;
     
