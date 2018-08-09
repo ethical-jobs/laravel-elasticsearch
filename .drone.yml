@@ -1,11 +1,18 @@
 pipeline:
 
-  test:
-    image: ethicaljobs/aphex:7.2.x
+  install:
+    image: composer
     pull: true
     commands: [ 
-      'sleep 2',
       'composer install --prefer-dist', 
+    ]
+    environment:
+      - ES_HOST=elasticsearch:9200
+
+  test:
+    image: php:7.2-cli-alpine
+    pull: true
+    commands: [ 
       'vendor/bin/phpunit' 
     ]
     environment:
