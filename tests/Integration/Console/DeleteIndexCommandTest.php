@@ -3,29 +3,23 @@
 namespace Tests\Integration\Console;
 
 use Mockery;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Artisan;
-use EthicalJobs\Elasticsearch\Index;
+use EthicalJobs\Elasticsearch\IndexManager;
 
 class DeleteIndexCommandTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Integration
      */
-    public function it_create_an_index()
+    public function it_deletes_an_index()
     {
-        $index = Mockery::mock(Index::class)
-            ->shouldReceive('getIndexName')
-            ->once()
-            ->withNoArgs()     
-            ->andReturn('test-index')           
+        $index = Mockery::mock(IndexManager::class)
             ->shouldReceive('delete')
             ->once()
-            ->withNoArgs()
-            ->getMock();
+            ->withNoArgs()     
+            ->andReturn(true);
 
-        App::instance(Index::class, $index);
+        $this->app->instance(IndexManager::class, $index->getMock());
 
         Artisan::call('ej:es:index-delete');
     }

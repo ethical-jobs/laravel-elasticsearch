@@ -5,6 +5,7 @@ namespace EthicalJobs\Elasticsearch;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Builder;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
 
 /**
  * Indexable trait for eloquent models
@@ -39,7 +40,7 @@ trait Document
     /**
      * {@inheritdoc}
      */
-    public function getDocumentType()
+    public function getDocumentType() : string
     {
         return $this->getTable();
     }
@@ -47,7 +48,7 @@ trait Document
     /**
      * {@inheritdoc}
      */
-    public function getDocumentBody()
+    public function getDocumentBody() : array
     {
         return $this->attributesToArray();
     }
@@ -55,7 +56,7 @@ trait Document
     /**
      * {@inheritdoc}
      */
-    public function getDocumentMappings()
+    public function getDocumentMappings() : array
     {
         return [];
     }
@@ -63,7 +64,7 @@ trait Document
     /**
      * {@inheritdoc}
      */
-    public function getDocumentRelations()
+    public function getDocumentRelations() : array
     {
         return [];
     }
@@ -84,7 +85,7 @@ trait Document
     /**
      * {@inheritdoc}
      */
-    public function getIndexingQuery(): Builder
+    public function getIndexingQuery() : Builder
     {
         $query = $this
             ->with($this->getDocumentRelations())
@@ -100,10 +101,10 @@ trait Document
     /**
      * Is attribute an indexable relation
      *
-     * @param String $attribute
-     * @return Boolean
+     * @param string $attribute
+     * @return bool
      */
-    public function isIndexableRelation($attribute)
+    public function isIndexableRelation($attribute) : bool
     {
         if (! in_array($attribute, $this->getDocumentRelations())) {
             return false;
@@ -113,7 +114,7 @@ trait Document
             return false;
         }
 
-        if (! App::make(Index::class)->isIndexable($this->$attribute()->getModel())) {
+        if (! Utilities::isIndexable($this->$attribute()->getModel())) {
             return false;
         }
 
@@ -123,9 +124,9 @@ trait Document
     /**
      * Builds a tree of the document and its relations
      *
-     * @return Array
+     * @return array
      */
-    public function getDocumentTree()
+    public function getDocumentTree() : array
     {
         $body = $this->getDocumentBody();
 

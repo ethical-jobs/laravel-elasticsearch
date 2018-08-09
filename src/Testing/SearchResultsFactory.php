@@ -5,7 +5,7 @@ namespace EthicalJobs\Elasticsearch\Testing;
 use Mockery;
 use Illuminate\Support\Collection;
 use M6Web\Component\ElasticsearchMock\Client as MockClient;
-use EthicalJobs\Elasticsearch\IndexableObserver;
+use EthicalJobs\Elasticsearch\Contracts\IndexableObserver;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
 
 /**

@@ -4,6 +4,7 @@ namespace Tests\Integration\Hydrators\Elasticsearch;
 
 use ArrayObject;
 use Tests\Fixtures\Models;
+use Illuminate\Support\Collection;
 use EthicalJobs\Elasticsearch\Hydrators\ObjectHydrator;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 
@@ -112,19 +113,18 @@ class ObjectHydratorTest extends \Tests\TestCase
     /**
      * @test
      * @group Integration
-     * @group skipped
      */
     public function it_builds_document_relations()
     {
-        $expectedRelations = ['members', 'vehicles'];
+        $expectedRelations = ['members', 'vehicle'];
 
         $documentRelations = (new Models\Family)->getDocumentRelations();
 
-        $families = factory(Models\Family::class, 2)
+        $families = factory(Models\Family::class, 3)
             ->create()
             ->each(function ($family) {
                 factory(Models\Person::class, rand(2, 6))->create(['family_id' => $family->id]);
-                factory(Models\Vehicle::class, rand(1, 2))->create(['family_id' => $family->id]);
+                factory(Models\Vehicle::class)->create(['family_id' => $family->id]);
             });
 
         $families->load($documentRelations);
@@ -137,9 +137,15 @@ class ObjectHydratorTest extends \Tests\TestCase
 
         // Check that document relations are built
         foreach ($hydrated as $family) {
-            foreach ($expectedRelations as $relation) {
-                $this->assertTrue(isset($family->$relation->id));
-            }
+            // Vehicle
+            $this->assertInstanceOf(ArrayObject::class, $family->vehicle);
+            $this->assertTrue(isset($family->vehicle->id));
+            // Family members
+            $this->assertInstanceOf(Collection::class, $family->members);
+            $family->members->each(function ($person) {
+                $this->assertInstanceOf(ArrayObject::class, $person);
+                $this->assertTrue(isset($person->id));
+            });
         }
     }
 }

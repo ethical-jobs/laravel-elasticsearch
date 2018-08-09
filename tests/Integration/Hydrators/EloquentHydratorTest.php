@@ -4,9 +4,10 @@ namespace Tests\Integration\Hydrators;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Tests\Fixtures\Models;
+use Illuminate\Database\Eloquent\Collection;
 use EthicalJobs\Elasticsearch\Hydrators\EloquentHydrator;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
+use Tests\Fixtures\Models;
 
 class EloquentHydratorTest extends \Tests\TestCase
 {
@@ -140,9 +141,15 @@ class EloquentHydratorTest extends \Tests\TestCase
 
         // Check that document relations are built
         foreach ($collection as $family) {
-            foreach ($expectedRelations as $relation) {
-                $this->assertTrue($family->$relation->id ? true : false);
-            }
+                // Vehicle
+                $this->assertInstanceOf(Models\Vehicle::class, $family->vehicle);
+                $this->assertTrue(isset($family->vehicle->id));
+                // Family members
+                $this->assertInstanceOf(Collection::class, $family->members);
+                $family->members->each(function ($person) {
+                    $this->assertInstanceOf(Models\Person::class, $person);
+                    $this->assertTrue(isset($person->id));
+                });
         }
     }
 }

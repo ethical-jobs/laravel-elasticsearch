@@ -3,98 +3,133 @@
 namespace Tests\Integration\Console;
 
 use Mockery;
+use Carbon\Carbon;
 use Elasticsearch\Client;
-use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Artisan;
+use EthicalJobs\Elasticsearch\Exceptions\IndexingException;
+use EthicalJobs\Elasticsearch\Commands\IndexDocuments;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
-use EthicalJobs\Elasticsearch\Indexing\IndexQuery;
-use EthicalJobs\Elasticsearch\Index;
+use EthicalJobs\Elasticsearch\Utilities;
 use Tests\Fixtures\Models;
 
 class IndexDocumentsCommandTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Integration
      */
-    public function it_performs_normal_query_indexing_without_processes_param()
+    public function it_indexes_all_indexables_by_default()
     {
-        factory(Models\Family::class, 50)->create();
-        factory(Models\Person::class, 50)->create();
-        factory(Models\Vehicle::class, 50)->create();
-
-        $client = Mockery::mock(Client::class);
+        $indexables = Utilities::getIndexables();
 
         $indexer = Mockery::mock(Indexer::class)
-            ->shouldNotReceive('queueIndex')
-            ->shouldReceive('indexQuery')
-            ->times(3)
+            ->shouldReceive('queue')
+            ->times(count($indexables))
             ->withAnyArgs()
             ->andReturn(null)
-            ->getMock();
+            ->getMock();         
 
-        App::instance(Client::class, $client);
+        $this->app->instance(Indexer::class, $indexer);
 
-        App::instance(Indexer::class, $indexer);
-
-        Artisan::call('ej:es:index', [
-            '--chunk-size' => 25,   
-        ]);
-    }
+        Artisan::call('ej:es:index');
+    }   
 
     /**
      * @test
-     * @group Integration
-     */
-    public function it_queues_index_queries_when_queue_param_present()
-    {
-        factory(Models\Family::class, 50)->create();
-        factory(Models\Person::class, 50)->create();
-        factory(Models\Vehicle::class, 50)->create();
-
-        $client = Mockery::mock(Client::class);
-
-        $indexer = Mockery::mock(Indexer::class)
-            ->shouldNotReceive('indexQuery')
-            ->shouldReceive('queueQuery')
-            ->times(3)
-            ->withAnyArgs()
-            ->andReturn(null)
-            ->getMock();
-
-        App::instance(Client::class, $client);
-
-        App::instance(Indexer::class, $indexer);
-
-        Artisan::call('ej:es:index', [
-            '--chunk-size'  => 25,   
-            '--queue'       => true,
-        ]);
-    }    
-
-    /**
-     * @test
-     * @group Integration
      */
     public function it_can_specify_indexables_to_index()
     {
         factory(Models\Family::class, 20)->create();
 
         $indexer = Mockery::mock(Indexer::class)
-            ->shouldReceive('indexQuery')
+            ->shouldReceive('queue')
             ->once()
-            ->withArgs(function ($indexQuery) {
-                $this->assertInstanceOf(Models\Family::class, $indexQuery->indexable);
-                return true;
-            })
+            ->withAnyArgs()
             ->andReturn(null)
             ->getMock();         
 
-        App::instance(Indexer::class, $indexer);
+        $this->app->instance(Indexer::class, $indexer);
 
-        Artisan::call('ej:es:index', [
-            '--chunk-size'   => 133,            
+        Artisan::call('ej:es:index', [          
             '--indexables'   => Models\Family::class,
         ]);
-    }                  
+    }    
+
+    /**
+     * @test
+     */
+    public function it_passes_correct_queries_to_indexer()
+    {
+        factory(Models\Family::class, 20)->create();
+
+        $indexer = Mockery::mock(Indexer::class)
+            ->shouldReceive('queue')
+            ->once()
+            ->withArgs(function ($query) {
+                return $query->get()->toArray() === (new Models\Family)->getIndexingQuery()->get()->toArray();
+            })
+            ->andReturn(null);         
+
+        $this->app->instance(Indexer::class, $indexer->getMock());
+
+        Artisan::call('ej:es:index', [          
+            '--indexables'   => Models\Family::class,
+        ]);
+    }        
+
+    /**
+     * @test
+     */
+    public function it_has_correct_default_chunk_size()
+    {
+        $indexer = Mockery::mock(Indexer::class)
+            ->shouldReceive('queue')
+            ->withArgs(function ($query, $chunkSize) {
+                return $chunkSize === 250;
+            })
+            ->andReturn(null);         
+
+        $this->app->instance(Indexer::class, $indexer->getMock());
+
+        Artisan::call('ej:es:index');
+    }       
+    
+    /**
+     * @test
+     */
+    public function it_can_specify_chunk_size()
+    {
+        $indexer = Mockery::mock(Indexer::class)
+            ->shouldReceive('queue')
+            ->withArgs(function ($query, $chunkSize) {
+                return $chunkSize === 1983;
+            })
+            ->andReturn(null);         
+
+        $this->app->instance(Indexer::class, $indexer->getMock());
+
+        Artisan::call('ej:es:index', [
+            '--chunk-size'   => 1983,
+        ]);
+    }     
+    
+    /**
+     * @test
+     */
+    public function only_one_command_runs_at_a_time()
+    {
+        $this->expectException(IndexingException::class);
+
+        Cache::forever(IndexDocuments::$cacheLock, true); 
+
+        $indexer = Mockery::mock(Indexer::class)
+            ->shouldReceive('queue')
+            ->never();   
+
+        $this->app->instance(Indexer::class, $indexer->getMock());
+
+        Artisan::call('ej:es:index');
+
+        Cache::forget(IndexDocuments::$cacheLock);
+    }      
 }

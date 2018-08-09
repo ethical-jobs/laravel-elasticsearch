@@ -2,14 +2,12 @@
 
 namespace EthicalJobs\Elasticsearch\Indexing;
 
-use Elasticsearch\Client;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
-use EthicalJobs\Elasticsearch\Exceptions\IndexingException;
-use EthicalJobs\Elasticsearch\Indexing\Logging\Logger;
-use EthicalJobs\Elasticsearch\Indexable;
+use Illuminate\Database\Eloquent\Collection;
+use EthicalJobs\Elasticsearch\Contracts\HasElasticsearch;
+use EthicalJobs\Elasticsearch\ElasticsearchClient;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
 use EthicalJobs\Elasticsearch\Utilities;
-use EthicalJobs\Elasticsearch\Index;
 
 /**
  * Indexes documents in elasticsearch
@@ -17,60 +15,40 @@ use EthicalJobs\Elasticsearch\Index;
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
 
-class Indexer
+class Indexer implements HasElasticsearch
 {
-    /**
-     * Elastic search client
-     *
-     * @param \Elasticsearch\Client
-     */
-    private $client;
+    use ElasticsearchClient;
 
     /**
-     * Elastic search index name
+     * Wait for documents to be indexed and available
      *
-     * @param string
+     * @param bool
      */
-    private $indexName;
+    private $synchronous = false;     
 
     /**
-     * Slack logging instance
+     * Enables "blocking" synchronous document indexing
      *
-     * @param \EthicalJobs\Elasticsearch\Indexing\Logger
-     */
-    private $logger;    
-
-    /**
-     * Constructor
-     *
-     * @param \Elasticsearch\Client $client
-     * @param \EthicalJobs\Elasticsearch\Indexing\Logging\Logger $logger
-     * @param string $indexName
      * @return void
      */
-    public function __construct(Client $client, Logger $logger, string $indexName)
+    public function synchronous() : void
     {
-        \DB::disableQueryLog();
-
-        $this->client = $client;
-
-        $this->logger = $logger;
-
-        $this->indexName = $indexName;
+        $this->synchronous = true;
     }
 
     /**
      * Indexes a indexable instance
      *
-     * @param \EthicalJobs\Elasticsearch\Indexabl $indexable
+     * @param Indexable $indexable
      * @return array
      */
     public function indexDocument(Indexable $indexable): array
     {
-        return $this->client->index([
-            'index'     => $this->indexName,
+        return $this->getElasticsearchClient()->index([
+            'index'     => Utilities::config('index'),
             'id'        => $indexable->getDocumentKey(),
             'type'      => $indexable->getDocumentType(),
+            'refresh'   => $this->synchronous ? 'wait_for' : false,
             'body'      => $indexable->getDocumentTree(),
         ]);
     }
@@ -78,78 +56,59 @@ class Indexer
     /**
      * Deletes a indexable instance
      *
-     * @param \EthicalJobs\Elasticsearch\Indexabl $indexable
+     * @param Indexable $indexable
      * @return array
      */
     public function deleteDocument(Indexable $indexable): array
     {
-        return $this->client->delete([
-            'index'     => $this->indexName,
+        return $this->getElasticsearchClient()->delete([
+            'index'     => Utilities::config('index'),
             'id'        => $indexable->getDocumentKey(),
             'type'      => $indexable->getDocumentType(),
+            'refresh'   => $this->synchronous ? 'wait_for' : false,
         ]);
     }    
 
     /**
-     * Indexes all items of an indexable
+     * Indexes a collection of documents
      *
-     * @param \EthicalJobs\Elasticsearch\Indexing\IndexQuery $indexQuery
-     * @return void
-     */
-    public function indexQuery(IndexQuery $indexQuery): void
-    {
-        $this->logger->join($indexQuery);
-
-        $indexQuery->chunk(function($chunk, $index) use($indexQuery) {
-
-            $response = $this->bulkRequest($chunk);
-
-            if (Utilities::isResponseValid($response) === false) {
-                $this->logger->log('Indexing error', Utilities::getResponseErrors($response));
-                throw new IndexingException('Invalid request parameters');
-            }
-        });
-
-        $this->logger->complete($indexQuery);
-    } 
-
-    /**
-     * Queues index queries into seperate processes
-     *
-     * @param \EthicalJobs\Elasticsearch\Indexing\IndexQuery $indexQuery
-     * @return void
-     */
-    public function queueQuery(IndexQuery $indexQuery): void
-    {
-        $this->logger->start($indexQuery);
-
-        ProcessIndexQuery::dispatch($indexQuery);
-    }     
-
-    /**
-     * Creates a request from a collection of indexables
-     *
-     * @param \Illuminate\Support\Collection $collection
-     * @param Bool $isDeleteRequest
+     * @param Collection $collection
      * @return array
      */
-    protected function bulkRequest(Collection $collection): array
+    public function indexCollection(Collection $collection) : array
     {
-        $params = [];
+        $params = [
+            'refresh' => $this->synchronous ? 'wait_for' : false,
+            'body' => [],
+        ];
 
         foreach ($collection as $indexable) {
 
             $params['body'][] = [
                 'index' => [
-                    '_index' => $this->indexName,
-                    '_id'    => $indexable->getDocumentKey(),
-                    '_type'  => $indexable->getDocumentType(),
+                    '_index' => Utilities::config('index'),
+                    '_id' => $indexable->getDocumentKey(),
+                    '_type' => $indexable->getDocumentType(),
                 ],
             ];
 
             $params['body'][] = $indexable->getDocumentTree();
         }
 
-        return $this->client->bulk($params);
+        return $this->getElasticsearchClient()->bulk($params);
     }
+
+    /**
+     * Queue the indexing of documents
+     *
+     * @param Builder $query
+     * @param integer $chunks
+     * @return void
+     */
+    public function queue(Builder $query, int $chunks = 100) : void
+    {
+        $query->chunk($chunks, function ($documents) {
+            IndexDocuments::dispatch($documents);
+        });
+    } 
 }

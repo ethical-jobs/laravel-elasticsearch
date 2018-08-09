@@ -3,7 +3,7 @@
 namespace EthicalJobs\Elasticsearch\Testing;
 
 use Mockery;
-use EthicalJobs\Elasticsearch\IndexableObserver;
+use EthicalJobs\Elasticsearch\Indexing\IndexableObserver;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
 
 /**
