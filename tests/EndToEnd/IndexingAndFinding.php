@@ -22,20 +22,14 @@ class IndexingAndFinding extends \Tests\TestCase
          
         $indexer->synchronous();
 
-        $indexer->queue($query, 100);
-         
-        sleep(3);
+        $indexer->queue($query, 500);
 
         $repository = resolve(PersonRepository::class);
-
-        // $start = microtime(true);
 
         $people = $repository
             ->setHydrator(new Hydrators\EloquentHydrator)
             ->limit(10000)
             ->find();
-
-        // $time_elapsed_secs = microtime(true) - $start;
 
         $this->assertEquals(4000, $people->count());
 
