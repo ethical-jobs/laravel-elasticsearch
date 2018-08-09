@@ -1,3 +1,7 @@
+# v2.1.1
+
+- Dependancy updates
+
 # v2.1.0
 
 - Refactor: es client builder
