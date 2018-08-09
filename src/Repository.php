@@ -47,14 +47,13 @@ class Repository implements HasElasticSearch, Contracts\Repository, Contracts\Ha
      * Object constructor.
      *
      * @param Indexable $indexable
-     * @param Search $search
      * @return void
      */
-    public function __construct(Indexable $indexable, Search $search)
+    public function __construct(Indexable $indexable)
     {
         $this->indexable = $indexable;
 
-        $this->search = $search;
+        $this->search = new Search;
 
         $this->criteria = new CriteriaCollection;
 
