@@ -1,3 +1,8 @@
+# v2.1.0
+
+- Refactor: es client builder
+- Refactor: test cases
+
 # v2.0.0
 
 - Rewrite: queued indexing
