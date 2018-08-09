@@ -5,7 +5,8 @@ pipeline:
     pull: true
     commands: [ 
       'sleep 2',
-      'composer install --prefer-dist', './vendor/bin/phpunit' 
+      'composer install --prefer-dist', 
+      'vendor/bin/phpunit' 
     ]
     environment:
       - ES_HOST=elasticsearch:9200
