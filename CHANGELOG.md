@@ -1,3 +1,7 @@
+# v2.1.2
+
+- Simplified repository constructor requirements
+
 # v2.1.1
 
 - Dependancy updates
