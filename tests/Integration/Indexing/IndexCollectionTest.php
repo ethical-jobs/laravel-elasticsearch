@@ -11,7 +11,6 @@ class IndexCollectionTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Integration
      */
     public function it_indexes_the_documents_and_returns_the_response()
     {
@@ -40,7 +39,9 @@ class IndexCollectionTest extends \Tests\TestCase
  			->andReturn(['hits' => 1])
  			->getMock();
 
- 		$indexer = new Indexer($client, 'test-index');
+        $indexer = resolve(Indexer::class);
+		 
+        $indexer->setElasticsearchClient($client);
 
  		$response = $indexer->indexCollection($people);
 
@@ -49,7 +50,6 @@ class IndexCollectionTest extends \Tests\TestCase
     
     /**
      * @test
-     * @group Integration
      */
     public function it_can_index_a_collection_synchronously()
     {
@@ -64,7 +64,9 @@ class IndexCollectionTest extends \Tests\TestCase
  			->andReturn(['hits' => 1])
  			->getMock();
 
-        $indexer = new Indexer($client, 'test-index');
+        $indexer = resolve(Indexer::class);
+		 
+        $indexer->setElasticsearchClient($client);
          
         $indexer->synchronous();
 

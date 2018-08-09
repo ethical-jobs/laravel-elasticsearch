@@ -4,7 +4,6 @@ namespace Tests\Integration\Repositories;
 
 use Mockery;
 use Elasticsearch\Client;
-use ONGR\ElasticsearchDSL\Search;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
 use Tests\Fixtures\Repositories\PersonRepository;
 use Tests\Fixtures\Models;
@@ -22,13 +21,15 @@ class FindTest extends \Tests\TestCase
             ->shouldReceive('search')
             ->once()
             ->withArgs(function($query) {
-                $this->assertEquals('testing', $query['index']);
+                $this->assertEquals('test-index', $query['index']);
                 return true;
             })
             ->andReturn(SearchResultsFactory::getSearchResults($people))
             ->getMock();       
 
-        $repository = new PersonRepository(new Search, $client);
+        $repository = resolve(PersonRepository::class);
+
+        $repository->setStorageEngine($client);
 
         $results = $repository->find();
     }      
@@ -50,7 +51,9 @@ class FindTest extends \Tests\TestCase
             ->andReturn(SearchResultsFactory::getSearchResults($people))
             ->getMock();       
 
-        $repository = new PersonRepository(new Search, $client); 
+        $repository = resolve(PersonRepository::class);
+
+        $repository->setStorageEngine($client);
 
         $results = $repository->find();
     }                       

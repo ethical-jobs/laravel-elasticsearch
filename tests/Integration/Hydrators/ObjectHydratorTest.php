@@ -137,17 +137,15 @@ class ObjectHydratorTest extends \Tests\TestCase
 
         // Check that document relations are built
         foreach ($hydrated as $family) {
-            foreach ($expectedRelations as $relation) {
-                // Vehicle
-                $this->assertInstanceOf(ArrayObject::class, $family->vehicle);
-                $this->assertTrue(isset($family->vehicle->id));
-                // Family members
-                $this->assertInstanceOf(Collection::class, $family->members);
-                $family->members->each(function ($person) {
-                    $this->assertInstanceOf(ArrayObject::class, $person);
-                    $this->assertTrue(isset($person->id));
-                });
-            }
+            // Vehicle
+            $this->assertInstanceOf(ArrayObject::class, $family->vehicle);
+            $this->assertTrue(isset($family->vehicle->id));
+            // Family members
+            $this->assertInstanceOf(Collection::class, $family->members);
+            $family->members->each(function ($person) {
+                $this->assertInstanceOf(ArrayObject::class, $person);
+                $this->assertTrue(isset($person->id));
+            });
         }
     }
 }

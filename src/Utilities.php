@@ -2,6 +2,8 @@
 
 namespace EthicalJobs\Elasticsearch;
 
+use Illuminate\Database\Eloquent\Model;
+
 /**
  * Static utility class
  *
@@ -108,8 +110,10 @@ class Utilities
      * @param mixed $default
      * @return mixed
      */
-    public static function config(string $key = '', $default)
+    public static function config(string $key = '', $default = null)
     {
-        return config("elasticsearch.$key", $default);
+        $key = (empty($key) === true) ? '' : ".$key"; // Allow empty key
+
+        return config("elasticsearch$key", $default);
     }      
 }

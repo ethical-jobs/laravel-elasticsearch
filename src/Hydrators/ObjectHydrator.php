@@ -5,8 +5,8 @@ namespace EthicalJobs\Elasticsearch\Hydrators;
 use ArrayObject;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
 use EthicalJobs\Storage\Contracts\Hydrator;
-use EthicalJobs\Elasticsearch\Indexable;
 
 /**
  * Hydrates ArrayObjects from elasticsearch results
@@ -19,14 +19,14 @@ class ObjectHydrator implements Hydrator
     /**
      * Indexable document type
      *
-     * @param App\Services\Elasticsearch\Indexable
+     * @param Indexable
      */
     protected $indexable;
 
     /**
      * {@inheritdoc}
      */
-    public function hydrateCollection(iterable $collection): iterable
+    public function hydrateCollection(iterable $collection) : iterable
     {
         if (empty($collection)) {
             return new Collection;
@@ -54,8 +54,8 @@ class ObjectHydrator implements Hydrator
     /**
      * Set indexable instance
      *
-     * @param EthicalJobs\Elasticsearch\Indexable $indexable
-     * @return EthicalJobs\Storage\Contracts\Hydrator
+     * @param Indexable $indexable
+     * @return Hydrator
      */
     public function setIndexable(Indexable $indexable): Hydrator
     {    
@@ -67,7 +67,7 @@ class ObjectHydrator implements Hydrator
     /**
      * Returns the indexable instance
      * 
-     * @return EthicalJobs\Elasticsearch\Indexable
+     * @return Indexable
      */
     public function getIndexable(): Indexable
     {    
@@ -77,7 +77,7 @@ class ObjectHydrator implements Hydrator
     /**
      * Hydrates a elastic hit
      *
-     * @param Array $item
+     * @param array $item
      * @return ArrayObject
      */
     protected function hydrateRecursive(Array $item)

@@ -2,16 +2,15 @@
 
 namespace EthicalJobs\Elasticsearch\Commands;
 
-use Illuminate\Console\Command;
-use EthicalJobs\Elasticsearch\Index;
+use EthicalJobs\Elasticsearch\IndexManager;
 
 /**
- * Deletes the primary elasticsearch index
+ * Deletes the default elasticsearch index
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
 
-class DeleteIndex extends Command
+class DeleteIndex extends \Illuminate\Console\Command
 {
     /**
      * The name and signature of the console command.
@@ -25,26 +24,26 @@ class DeleteIndex extends Command
      *
      * @var string
      */
-    protected $description = 'Deletes the primary elasticsearch index';
+    protected $description = 'Deletes the default elasticsearch index';
 
     /**
      * Elastic search index service
      *
-     * @param \EthicalJobs\Elasticsearch\Index
+     * @param IndexManager
      */
-    private $index;
+    private $indexManager;
 
     /**
      * Constructor
      *
-     * @param \EthicalJobs\Elasticsearch\Index $index
+     * @param IndexManager $indexManager
      * @return void
      */
-    public function __construct(Index $index)
+    public function __construct(IndexManager $indexManager)
     {
         parent::__construct();
 
-        $this->index = $index;
+        $this->indexManager = $indexManager;
     }
 
     /**
@@ -54,8 +53,14 @@ class DeleteIndex extends Command
      */
     public function handle()
     {
-        $response = $this->index->delete();
+        $response = $this->indexManager->delete();
 
-        $this->info(implode("\n", $response ?? []));
+        if ($response) {
+            $this->info('Index successfully deleted.');
+        } else {
+            $this->error('Index deletion failed.');
+        }
+
+        return $response;
     }
 }

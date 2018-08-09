@@ -2,7 +2,6 @@
 
 namespace Tests\Fixtures\Repositories;
 
-use Elasticsearch\Client;
 use ONGR\ElasticsearchDSL\Search;
 use Tests\Fixtures\Models\Family;
 
@@ -14,16 +13,14 @@ use Tests\Fixtures\Models\Family;
 
 class FamilyRepository extends \EthicalJobs\Elasticsearch\Repository
 {
-
     /**
-     * Object constructor
+     * Object constructor.
      *
-     * @param \ONGR\ElasticsearchDSL\Search $search
-     * @param \Elasticsearch\Client $client
+     * @param Search $search
      * @return void
      */
-    public function __construct(Search $search, Client $client)
+    public function __construct(Search $search)
     {
-        parent::__construct(new Family, $search, $client, config('elasticsearch.index'));
+        parent::__construct(new Family, $search);
     }
 }

@@ -11,16 +11,13 @@ class DeleteDocumentTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Integration
      */
     public function it_indexes_the_document_and_returns_the_response()
     {
- 		$indexName = 'test-index';
-
  		$person = factory(Person::class)->create();
 
  		$params = [
-            'index' 	=> $indexName,
+            'index' 	=> 'test-index',
             'id'    	=> $person->getDocumentKey(),
 			'type'  	=> $person->getDocumentType(),
 			'refresh'	=> false,
@@ -33,7 +30,9 @@ class DeleteDocumentTest extends \Tests\TestCase
  			->andReturn(['hits' => 1])
  			->getMock();
 
- 		$indexer = new Indexer($client, $indexName);
+		$indexer = resolve(Indexer::class);
+		 
+		$indexer->setElasticsearchClient($client);
 
  		$response = $indexer->deleteDocument($person);
 
@@ -42,16 +41,13 @@ class DeleteDocumentTest extends \Tests\TestCase
 	
     /**
      * @test
-     * @group Integration
      */
-    public function it_can_index_documents_synchronously()
+    public function it_can_delete_documents_synchronously()
     {
- 		$indexName = 'test-index';
-
  		$person = factory(Person::class)->create();
 
  		$params = [
-            'index' 	=> $indexName,
+            'index' 	=> 'test-index',
             'id'    	=> $person->getDocumentKey(),
 			'type'  	=> $person->getDocumentType(),
 			'refresh'	=> 'wait_for',
@@ -64,7 +60,9 @@ class DeleteDocumentTest extends \Tests\TestCase
  			->andReturn(['hits' => 1])
  			->getMock();
 
-		$indexer = new Indexer($client, $indexName);
+		$indexer = resolve(Indexer::class);
+		 
+		$indexer->setElasticsearchClient($client);
 		 
 		$indexer->synchronous();
 

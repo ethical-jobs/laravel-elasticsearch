@@ -2,7 +2,6 @@
 
 namespace Tests\Fixtures\Repositories;
 
-use Elasticsearch\Client;
 use ONGR\ElasticsearchDSL\Search;
 use Tests\Fixtures\Models\Person;
 
@@ -14,16 +13,14 @@ use Tests\Fixtures\Models\Person;
 
 class PersonRepository extends \EthicalJobs\Elasticsearch\Repository
 {
-
     /**
-     * Object constructor
+     * Object constructor.
      *
-     * @param \ONGR\ElasticsearchDSL\Search $search
-     * @param \Elasticsearch\Client $client
+     * @param Search $search
      * @return void
      */
-    public function __construct(Search $search, Client $client)
+    public function __construct(Search $search)
     {
-        parent::__construct(new Person, $search, $client, config('elasticsearch.index'));
+        parent::__construct(new Person, $search);
     }
 }

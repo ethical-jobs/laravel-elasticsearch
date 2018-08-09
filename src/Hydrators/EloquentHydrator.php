@@ -7,8 +7,8 @@ use ReflectionMethod;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
 use EthicalJobs\Storage\Contracts\Hydrator;
-use EthicalJobs\Elasticsearch\Indexable;
 
 /**
  * Hydrates eloquent models from elasticsearch results
@@ -21,7 +21,7 @@ class EloquentHydrator implements Hydrator
     /**
      * Indexable document type
      *
-     * @param App\Services\Elasticsearch\Indexable
+     * @param Indexable
      */
     protected $indexable;
 
@@ -66,8 +66,8 @@ class EloquentHydrator implements Hydrator
     /**
      * Set indexable instance
      *
-     * @param EthicalJobs\Elasticsearch\Indexable $indexable
-     * @return EthicalJobs\Storage\Contracts\Hydrator
+     * @param Indexable $indexable
+     * @return Hydrator
      */
     public function setIndexable(Indexable $indexable): Hydrator
     {    
@@ -79,7 +79,7 @@ class EloquentHydrator implements Hydrator
     /**
      * Returns the indexable instance
      * 
-     * @return EthicalJobs\Elasticsearch\Indexable
+     * @return Indexable
      */
     public function getIndexable(): Indexable
     {    
@@ -90,7 +90,7 @@ class EloquentHydrator implements Hydrator
      * Hydrates an eloquent model from an array of attributes
      *
      * @param array $entity
-     * @return Illuminate\Database\Eloquent\Model
+     * @return Model
      */
     protected function hydrateEntityRecursive(array $hit): Model
     {
@@ -104,8 +104,8 @@ class EloquentHydrator implements Hydrator
     /**
      * Parses date attributes
      *
-     * @param \Illuminate\Database\Eloquent\Model $entity
-     * @return \Illuminate\Database\Eloquent\Model
+     * @param Model $entity
+     * @return Model
      */
     protected function parseDateFields(Model $entity): Model
     {
@@ -121,8 +121,8 @@ class EloquentHydrator implements Hydrator
     /**
      * Hydrates the relations of an indexable
      *
-     * @param \Illuminate\Database\Eloquent\Model $entity
-     * @return \Illuminate\Database\Eloquent\Model
+     * @param Model $entity
+     * @return Model
      */
     protected function hydrateRelations(Model $entity): Model
     {
@@ -175,7 +175,7 @@ class EloquentHydrator implements Hydrator
      * Converts array to collection
      *
      * @param array $entities
-     * @return Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     protected function toCollection(array $entities)
     {

@@ -4,6 +4,7 @@ namespace Tests\Integration\Repositories;
 
 use Mockery;
 use Carbon\Carbon;
+use Elasticsearch\Client;
 use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
 use Tests\Fixtures\Repositories\PersonRepository;
 use Tests\Helpers\Indexer;

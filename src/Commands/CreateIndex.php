@@ -2,16 +2,15 @@
 
 namespace EthicalJobs\Elasticsearch\Commands;
 
-use Illuminate\Console\Command;
-use EthicalJobs\Elasticsearch\Index;
+use EthicalJobs\Elasticsearch\IndexManager;
 
 /**
- * Creates the primary elasticsearch index
+ * Creates the default elasticsearch index
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
 
-class CreateIndex extends Command
+class CreateIndex extends \Illuminate\Console\Command
 {
     /**
      * The name and signature of the console command.
@@ -25,26 +24,26 @@ class CreateIndex extends Command
      *
      * @var string
      */
-    protected $description = 'Creates the primary elasticsearch index';
+    protected $description = 'Creates the default elasticsearch index';
 
     /**
-     * Elastic search index service
+     * Elastic search index manager service
      *
-     * @param \EthicalJobs\Elasticsearch\Index
+     * @param IndexManager
      */
-    private $index;
+    private $indexManager;
 
     /**
      * Constructor
      *
-     * @param \EthicalJobs\Elasticsearch\Index $index
+     * @param IndexManager $indexManager
      * @return void
      */
-    public function __construct(Index $index)
+    public function __construct(IndexManager $indexManager)
     {
         parent::__construct();
 
-        $this->index = $index;
+        $this->indexManager = $indexManager;
     }
 
     /**
@@ -54,8 +53,14 @@ class CreateIndex extends Command
      */
     public function handle()
     {
-        $response = $this->index->create();
+        $response = $this->indexManager->create();
 
-        $this->info(implode("\n", $response ?? []));
+        if ($response) {
+            $this->info('Index successfully created.');
+        } else {
+            $this->error('Index creation failed.');
+        }        
+
+        return $response;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace EthicalJobs\Elasticsearch;
+namespace EthicalJobs\Elasticsearch\Contracts;
 
 use Illuminate\Database\Eloquent\Builder;
 

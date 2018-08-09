@@ -2,16 +2,13 @@
 
 namespace EthicalJobs\Elasticsearch\Commands;
 
-use Illuminate\Console\Command;
-use Artisan;
-
 /**
  * Deletes, creates and then indexes documents
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
 
-class FlushIndex extends Command
+class FlushIndex extends \Illuminate\Console\Command
 {
     /**
      * The name and signature of the console command.

@@ -2,12 +2,10 @@
 
 namespace EthicalJobs\Elasticsearch\Commands;
 
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
-use EthicalJobs\Elasticsearch\Indexing\IndexQuery;
+use EthicalJobs\Elasticsearch\Exceptions\IndexingException;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
-use EthicalJobs\Elasticsearch\Indexable;
-use EthicalJobs\Elasticsearch\Index;
+use EthicalJobs\Elasticsearch\Utilities;
 
 /**
  * Indexes indexable entities in Elasticsearch
@@ -15,7 +13,7 @@ use EthicalJobs\Elasticsearch\Index;
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
 
-class IndexDocuments extends Command
+class IndexDocuments extends \Illuminate\Console\Command
 {
     /**
      * The name and signature of the console command.
@@ -34,33 +32,30 @@ class IndexDocuments extends Command
     protected $description = 'Indexes indexables into Elasticsearch';
 
     /**
-     * Elastic search index instance
+     * Cache lock key
      *
-     * @param \EthicalJobs\Elasticsearch\Index 
+     * @var string
      */
-    private $index;    
+    public static $cacheLock = 'ej:es:indexing';
 
     /**
      * Elastic search index service
      *
-     * @param \App\Services\Elasticsearch\Indexing\Indexer
+     * @param Indexer
      */
     private $indexer;
 
     /**
-     * Constructor
+     * Object constructor.
      *
-     * @param \App\Services\Elasticsearch\Indexing\Indexer $indexer
-     * @param \EthicalJobs\Elasticsearch\Index $index
+     * @param Indexer $indexer
      * @return void
      */
-    public function __construct(Index $index, Indexer $indexer)
+    public function __construct(Indexer $indexer)
     {
         parent::__construct();
 
         $this->indexer = $indexer;
-
-        $this->index = $index;
     }
 
     /**
@@ -81,19 +76,22 @@ class IndexDocuments extends Command
      * @param  string $indexable
      * @return void
      */
-    protected function index(string $indexable): void
+    protected function index(string $indexable) : void
     {
-        if (Cache::get('es:es:indexing')) {
-            throw new \Exception('Indexing operation already running.');
+        if (Cache::get(static::$cacheLock)) {
+            throw new IndexingException('Indexing operation already running.');
         }
 
-        Cache::put('es:es:indexing', true, 60);
+        Cache::forever(static::$cacheLock, true); 
 
-        $query = (new $indexable)->getIndexingQuery();
+        try {
+            $this->queueIndexable($indexable);
+        } catch (\Exception $exception) {
+            Cache::forget(static::$cacheLock);
+            throw $exception;
+        }
 
-        $this->indexer->queue($query, $this->option('chunk-size'));
-
-        Cache::forget('es:es:indexing');
+        Cache::forget(static::$cacheLock);
     }       
 
     /**
@@ -101,12 +99,25 @@ class IndexDocuments extends Command
      *
      * @return array
      */
-    protected function getIndexables(): array
+    protected function getIndexables() : array
     {
         if ($option = $this->option('indexables')) {
             return is_array($option) ? $option : [$option];
         }
         
-        return $this->index->getSettings()->getIndexables();       
+        return Utilities::getIndexables();       
     }    
+
+    /**
+     * Initiiates indexing of an indexable type
+     *
+     * @param  string $indexable
+     * @return void
+     */
+    protected function queueIndexable(string $indexable) : void
+    {
+        $query = (new $indexable)->getIndexingQuery();
+
+        $this->indexer->queue($query, $this->option('chunk-size'));             
+    }        
 }

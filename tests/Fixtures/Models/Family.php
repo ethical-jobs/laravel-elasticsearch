@@ -3,7 +3,7 @@
 namespace Tests\Fixtures\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use EthicalJobs\Elasticsearch\Indexable;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
 use EthicalJobs\Elasticsearch\Document;
 
 class Family extends Model implements Indexable

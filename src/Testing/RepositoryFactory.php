@@ -10,7 +10,7 @@ use EthicalJobs\Storage\Contracts;
 use EthicalJobs\SDK\ApiClient;
 use Elasticsearch\Client;
 use ONGR\ElasticsearchDSL\Search;
-use EthicalJobs\Elasticsearch\Indexable;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
 
 /**
  * Repository static factory - builds repository instances

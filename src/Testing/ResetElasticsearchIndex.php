@@ -2,7 +2,7 @@
 
 namespace EthicalJobs\Elasticsearch\Testing;
 
-use EthicalJobs\Elasticsearch\Index;
+use EthicalJobs\Elasticsearch\IndexManager;
 
 /**
  * Resets the elasticsearch index on each testcase
@@ -31,7 +31,7 @@ trait ResetElasticsearchIndex
      */
     public function resetTestIndex() : void
     {
-        $index = resolve(Index::class);
+        $index = resolve(IndexManager::class);
 
         if ($index->exists()) {
             $index->delete();

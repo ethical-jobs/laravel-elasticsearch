@@ -5,6 +5,7 @@ namespace EthicalJobs\Elasticsearch;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Builder;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
 
 /**
  * Indexable trait for eloquent models

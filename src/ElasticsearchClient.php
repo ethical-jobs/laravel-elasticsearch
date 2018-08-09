@@ -33,10 +33,9 @@ trait ElasticsearchClient
     public function getElasticsearchClient() : Client
     {
         if (empty($this->client)) {
+            $connectionKey = config('elasticsearch.default');
 
-            $default = config('elasticsearch.default');
-
-            $connection = config("elasticsearch.connection.$default", []);
+            $connection = config("elasticsearch.connections.$connectionKey", []);
 
             $this->client = $this->buildClient($connection);
         }

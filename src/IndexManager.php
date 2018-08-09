@@ -58,33 +58,37 @@ class IndexManager implements HasElasticsearch
     /**
      * Create the index
      *
-     * @return int
+     * @return bool
      */
-    public function create() : int
+    public function create() : bool
     {
         if ($this->exists()) {
             throw new \Exception('Index already exists.');
         }
 
-        return $this->getElasticsearchClient()->indices()->create([
+        $response = $this->getElasticsearchClient()->indices()->create([
             'index' => static::getIndexName(),
             'body'  => [
                 'settings'  => Utilities::config('settings', []),
                 'mappings'  => $this->getIndexMappings(),
             ],
         ]);
+
+        return isset($response['acknowledged']) ? $response['acknowledged'] === true : false;
     }
 
     /**
      * Delete the index
      *
-     * @return int
+     * @return bool
      */
-    public function delete() : int
+    public function delete() : bool
     {
-        return $this->getElasticsearchClient()->indices()->delete([
+        $response = $this->getElasticsearchClient()->indices()->delete([
             'index' => static::getIndexName(),
         ]);
+
+        return isset($response['acknowledged']) ? $response['acknowledged'] === true : false;
     }
 
     /**

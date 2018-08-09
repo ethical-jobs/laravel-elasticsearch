@@ -1,12 +1,10 @@
 <?php
 
-namespace EthicalJobs\Elasticsearch;
+namespace EthicalJobs\Elasticsearch\Indexing;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
-use EthicalJobs\Elasticsearch\Events;
 use EthicalJobs\Elasticsearch\Utilities;
-use EthicalJobs\Elasticsearch\Indexing\Indexer;
 
 /**
  * Updates elasticsearch from eloquent model events.
@@ -19,14 +17,14 @@ class IndexableObserver
     /**
      * Elastic search index service
      *
-     * @param \EthicalJobs\Elasticsearch\Indexing\Indexer
+     * @param Indexer
      */
     private $indexer;
 
     /**
      * Constructor
      *
-     * @param \EthicalJobs\Elasticsearch\Indexing\Indexer $indexer
+     * @param Indexer $indexer
      * @return void
      */
     public function __construct(Indexer $indexer)
@@ -37,7 +35,7 @@ class IndexableObserver
     /**
      * Listens to the created event
      *
-     * @param Illuminate\Database\Eloquent\Model $indexable
+     * @param Model $indexable
      * @return void
      */
     public function created(Model $indexable)
@@ -48,7 +46,7 @@ class IndexableObserver
     /**
      * Listens to the updated event
      *
-     * @param Illuminate\Database\Eloquent\Model $indexable
+     * @param Model $indexable
      * @return void
      */
     public function updated(Model $indexable)
@@ -59,7 +57,7 @@ class IndexableObserver
     /**
      * Listen to the deleting event.
      *
-     * @param Illuminate\Database\Eloquent\Model $indexable
+     * @param Model $indexable
      * @return void
      */
     public function deleted(Model $indexable)
@@ -74,7 +72,7 @@ class IndexableObserver
     /**
      * Listen to the restored event.
      *
-     * @param Illuminate\Database\Eloquent\Model $indexable
+     * @param Model $indexable
      * @return void
      */
     public function restored(Model $indexable)
@@ -85,7 +83,7 @@ class IndexableObserver
     /**
      * Executes index action. Swallow and log.
      *
-     * @param Illuminate\Database\Eloquent\Model $indexable
+     * @param Model $indexable
      * @return void
      */
     protected function indexDocument(Model $indexable)
@@ -93,14 +91,14 @@ class IndexableObserver
         try {
             $this->indexer->indexDocument($indexable); 
         } catch (\Exception $exception) {
-            Log::critical("ej:es:indexing - : ".$exception->getMessage(), $indexable->toArray());
+            Log::critical('ej:es:indexing:observer '.$exception->getMessage(), $indexable->toArray());
         }
     }    
 
     /**
      * Executes delete action. Swallow and log.
      *
-     * @param Illuminate\Database\Eloquent\Model $indexable
+     * @param Model $indexable
      * @return void
      */
     protected function deleteDocument(Model $indexable)
@@ -108,7 +106,7 @@ class IndexableObserver
         try {
             $this->indexer->deleteDocument($indexable); 
         } catch (\Exception $exception) {
-            Log::critical("ej:es:deleting - : ".$exception->getMessage(), $indexable->toArray());
+            Log::critical('ej:es:indexing:observer '.$exception->getMessage(), $indexable->toArray());
         }
     }        
 }

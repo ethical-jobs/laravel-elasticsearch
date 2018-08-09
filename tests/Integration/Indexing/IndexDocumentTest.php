@@ -11,16 +11,13 @@ class IndexDocumentTest extends \Tests\TestCase
 {
     /**
      * @test
-     * @group Integration
      */
     public function it_indexes_the_document_and_returns_the_response()
     {
- 		$indexName = 'test-index';
-
  		$person = factory(Person::class)->create();
 
  		$params = [
-            'index'     => $indexName,
+            'index'     => 'test-index',
             'id'        => $person->getDocumentKey(),
 			'type'      => $person->getDocumentType(),
 			'refresh'	=> false,
@@ -34,10 +31,45 @@ class IndexDocumentTest extends \Tests\TestCase
  			->andReturn(['hits' => 1])
  			->getMock();
 
- 		$indexer = new Indexer($client, $indexName);
+		$indexer = resolve(Indexer::class);
+		 
+		$indexer->setElasticsearchClient($client);
 
  		$response = $indexer->indexDocument($person);
 
  		$this->assertEquals(['hits' => 1], $response);
-    } 	    
+	} 	   
+	
+    /**
+     * @test
+     */
+    public function it_can_index_documents_synchronously()
+    {
+		$person = factory(Person::class)->create();
+
+		$params = [
+		   'index' => 'test-index',
+		   'id' => $person->getDocumentKey(),
+		   'type' => $person->getDocumentType(),
+		   'refresh' => 'wait_for',
+		   'body' => $person->getDocumentTree(),
+		];
+
+		$client = Mockery::mock(Client::class)
+			->shouldReceive('index')
+			->once()
+			->with($params)
+			->andReturn(['hits' => 1])
+			->getMock();
+
+		$indexer = resolve(Indexer::class);
+		
+		$indexer->setElasticsearchClient($client);
+		
+		$indexer->synchronous();
+
+		$response = $indexer->indexDocument($person);
+
+		$this->assertEquals(['hits' => 1], $response);
+    } 	 	
 }

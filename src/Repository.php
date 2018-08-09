@@ -2,6 +2,7 @@
 
 namespace EthicalJobs\Elasticsearch;
 
+use Elasticsearch\Client;
 use Illuminate\Database\Eloquent\Model;
 use ONGR\ElasticsearchDSL\Search;
 use ONGR\ElasticsearchDSL\Sort\FieldSort;
@@ -13,6 +14,7 @@ use EthicalJobs\Storage\Contracts;
 use EthicalJobs\Storage\HasCriteria;
 use EthicalJobs\Storage\CriteriaCollection;
 use EthicalJobs\Storage\HydratesResults;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
 use EthicalJobs\Elasticsearch\Contracts\HasElasticSearch;
 use EthicalJobs\Elasticsearch\Hydrators\ObjectHydrator;
 use EthicalJobs\Elasticsearch\Utilities;
@@ -25,9 +27,7 @@ use EthicalJobs\Elasticsearch\Utilities;
 
 class Repository implements HasElasticSearch, Contracts\Repository, Contracts\HasCriteria, Contracts\HydratesResults
 {
-    use ElasticsearchClient, 
-        HasCriteria, 
-        HydratesResults;
+    use ElasticsearchClient, HasCriteria, HydratesResults;
     
     /**
      * Indexable model 
@@ -44,10 +44,10 @@ class Repository implements HasElasticSearch, Contracts\Repository, Contracts\Ha
     protected $search;
 
     /**
-     * Object constructor
+     * Object constructor.
      *
-     * @param \EthicalJobs\Elasticsearch\Indexable $indexable
-     * @param \ONGR\ElasticsearchDSL\Search $search
+     * @param Indexable $indexable
+     * @param Search $search
      * @return void
      */
     public function __construct(Indexable $indexable, Search $search)
@@ -66,10 +66,10 @@ class Repository implements HasElasticSearch, Contracts\Repository, Contracts\Ha
     /**
      * {@inheritdoc}
      */
-    public function getElasticsearchClient()
+    public function getStorageEngine()
     {    
         return $this->getElasticSearchClient();
-    }
+    }     
 
     /**
      * {@inheritdoc}
@@ -218,7 +218,7 @@ class Repository implements HasElasticSearch, Contracts\Repository, Contracts\Ha
         $this->applyCriteria();
 
         $response = $this->getElasticsearchClient()->search([
-            'index' => $this->indexName,
+            'index' => Utilities::config('index'),
             'type'  => $this->indexable->getDocumentType(),
             'body'  => $this->search->toArray(),
         ]);

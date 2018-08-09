@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use EthicalJobs\Elasticsearch\Contracts\HasElasticsearch;
 use EthicalJobs\Elasticsearch\ElasticsearchClient;
-use EthicalJobs\Elasticsearch\Indexable;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
+use EthicalJobs\Elasticsearch\Utilities;
 
 /**
  * Indexes documents in elasticsearch
@@ -44,7 +45,7 @@ class Indexer implements HasElasticsearch
     public function indexDocument(Indexable $indexable): array
     {
         return $this->getElasticsearchClient()->index([
-            'index'     => $this->indexName,
+            'index'     => Utilities::config('index'),
             'id'        => $indexable->getDocumentKey(),
             'type'      => $indexable->getDocumentType(),
             'refresh'   => $this->synchronous ? 'wait_for' : false,
@@ -55,13 +56,13 @@ class Indexer implements HasElasticsearch
     /**
      * Deletes a indexable instance
      *
-     * @param \EthicalJobs\Elasticsearch\Indexable $indexable
+     * @param Indexable $indexable
      * @return array
      */
     public function deleteDocument(Indexable $indexable): array
     {
         return $this->getElasticsearchClient()->delete([
-            'index'     => $this->indexName,
+            'index'     => Utilities::config('index'),
             'id'        => $indexable->getDocumentKey(),
             'type'      => $indexable->getDocumentType(),
             'refresh'   => $this->synchronous ? 'wait_for' : false,
@@ -85,7 +86,7 @@ class Indexer implements HasElasticsearch
 
             $params['body'][] = [
                 'index' => [
-                    '_index' => $this->indexName,
+                    '_index' => Utilities::config('index'),
                     '_id' => $indexable->getDocumentKey(),
                     '_type' => $indexable->getDocumentType(),
                 ],
