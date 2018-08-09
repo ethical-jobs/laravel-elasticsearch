@@ -24,6 +24,8 @@ class IndexingAndFinding extends \Tests\TestCase
 
         $indexer->queue($query, 500);
 
+        sleep(2);
+
         $repository = resolve(PersonRepository::class);
 
         $people = $repository
