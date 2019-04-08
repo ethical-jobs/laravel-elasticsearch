@@ -15,12 +15,12 @@ trait ElasticsearchClient
     protected $client;
 
     /**
-     * Sets the elasticsearch client 
+     * Sets the elasticsearch client
      *
      * @param Client $client
      * @return void
-     */  
-    public function setElasticsearchClient(Client $client) : void
+     */
+    public function setElasticsearchClient(Client $client): void
     {
         $this->client = $client;
     }
@@ -29,8 +29,8 @@ trait ElasticsearchClient
      * Returns the elasticsearch client
      *
      * @return Client
-     */    
-    public function getElasticsearchClient() : Client
+     */
+    public function getElasticsearchClient(): Client
     {
         if (empty($this->client)) {
             $connectionKey = config('elasticsearch.default');
@@ -41,7 +41,7 @@ trait ElasticsearchClient
         }
 
         return $this->client;
-    }     
+    }
 
     /**
      * Builds a new client instance
@@ -49,18 +49,18 @@ trait ElasticsearchClient
      * @param array $params
      * @return Client
      */
-    protected function buildClient(array $params) : Client
+    protected function buildClient(array $params): Client
     {
         $builder = ClientBuilder::create();
-        
+
         $builder->setHosts($params['hosts']);
 
         if ($params['logging']) {
-            $logPath = storage_path('logs/elasticsearch-'.php_sapi_name().'.log');
+            $logPath = storage_path('logs/elasticsearch-' . php_sapi_name() . '.log');
             $logger = ClientBuilder::defaultLogger($logPath);
             $builder->setLogger($logger);
         }
 
-        return $builder->build();        
+        return $builder->build();
     }
 }

@@ -2,12 +2,12 @@
 
 namespace Tests\Integration\Repositories;
 
-use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
+use Tests\Fixtures\Models;
 use Tests\Fixtures\Repositories\FamilyRepository;
 use Tests\Helpers\Indexer;
-use Tests\Fixtures\Models;
+use Tests\TestCase;
 
-class WhereHasInTest extends \Tests\TestCase
+class WhereHasInTest extends TestCase
 {
     /**
      * @test
@@ -26,33 +26,33 @@ class WhereHasInTest extends \Tests\TestCase
         factory(Models\Person::class)->create([
             'sex' => 'female',
             'family_id' => $obamas->id,
-        ]);        
+        ]);
 
         factory(Models\Person::class)->create([
             'sex' => 'trans',
             'family_id' => $trumps->id,
-        ]);          
-    
-        Indexer::all(Models\Family::class);     
+        ]);
+
+        Indexer::all(Models\Family::class);
 
         $families = resolve(FamilyRepository::class)
-            ->whereHasIn('members.sex', ['male','trans'])
+            ->whereHasIn('members.sex', ['male', 'trans'])
             ->find();
 
         $this->assertEquals(2, $families->count());
-        $this->assertEquals($families->pluck('surname')->toArray(), ['Trump','Obama']);
+        $this->assertEquals($families->pluck('surname')->toArray(), ['Trump', 'Obama']);
 
         foreach ($families as $family) {
 
             $shouldHaveAtLeastOne = false;
 
             foreach ($family->members->pluck('sex') as $gender) {
-                if (in_array($gender, ['male','trans'])) {
+                if (in_array($gender, ['male', 'trans'])) {
                     $shouldHaveAtLeastOne = true;
                 }
             }
 
             $this->assertTrue($shouldHaveAtLeastOne);
         }
-    }        
+    }
 }

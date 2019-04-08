@@ -1,27 +1,22 @@
 pipeline:
 
   test:
-    image: ethicaljobs/aphex:7.2.x
+    image: ethicaljobs/aphex
     pull: true
     commands: [ 
-      'sleep 3',
+      'sleep 15',
       'composer install --prefer-dist', 
       './vendor/bin/phpunit' 
     ]
     environment:
       - ES_HOST=elasticsearch:9200
 
-  publish:
-    image: byrnedo/alpine-curl
-    commands: [ 'curl -XPOST -H"content-type:application/json" "https://packagist.org/api/update-package?username=andrewmclagan&apiToken=2cmy6xog4hs0kogk4ccg" -d''{"repository":{"url":"https://github.com/ethical-jobs/laravel-elasticsearch"}}''' ]
-    when:
-      status: success
-      event: tag
-
   notify-slack:
     image: plugins/slack
     webhook: https://hooks.slack.com/services/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
     channel: deployments
+    when:
+      event: tag
 
 services:
   elasticsearch:

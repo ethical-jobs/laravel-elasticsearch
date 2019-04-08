@@ -6,8 +6,9 @@ use Mockery;
 use Illuminate\Support\Facades\Artisan;
 use EthicalJobs\Elasticsearch\IndexManager;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
+use Tests\TestCase;
 
-class FlushIndexCommandTest extends \Tests\TestCase
+class FlushIndexCommandTest extends TestCase
 {
     /**
      * @test

@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 interface Indexable
 {
     /**
@@ -29,28 +28,28 @@ interface Indexable
     /**
      * Return the documents field data
      *
-     * @return Array
+     * @return array
      */
     public function getDocumentBody();
 
     /**
      * Return the documents field map
      *
-     * @return Array
+     * @return array
      */
     public function getDocumentMappings();
 
     /**
      * Return the documents relations
      *
-     * @return Array
+     * @return array
      */
     public function getDocumentRelations();
 
     /**
      * Returns indexing query
      *
-     * @return Illuminate\Database\Query\Builder
+     * @return Builder
      */
     public function getIndexingQuery(): Builder;
 }

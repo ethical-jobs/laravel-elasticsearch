@@ -2,14 +2,13 @@
 
 namespace Tests\Integration;
 
-use Mockery;
 use Elasticsearch\Client;
 use EthicalJobs\Elasticsearch\IndexManager;
-use EthicalJobs\Elasticsearch\Contracts\Indexable;
 use EthicalJobs\Elasticsearch\Utilities;
-use Tests\Fixtures\Models;
+use Mockery;
+use Tests\TestCase;
 
-class IndexManagerTest extends \Tests\TestCase
+class IndexManagerTest extends TestCase
 {
     /**
      * @test
@@ -53,7 +52,7 @@ class IndexManagerTest extends \Tests\TestCase
             ->andReturn(Mockery::self())
             ->shouldReceive('exists')
             ->with([
-                'index' => IndexManager::getIndexName()
+                'index' => IndexManager::getIndexName(),
             ])
             ->andReturn(false)
             ->shouldReceive('indices')
@@ -62,7 +61,7 @@ class IndexManagerTest extends \Tests\TestCase
             ->shouldReceive('create')
             ->with([
                 'index' => 'test-index',
-                'body'  => [
+                'body' => [
                     'settings' => Utilities::config('settings'),
                     'mappings' => $indexManager->getIndexMappings(),
                 ],
@@ -70,7 +69,7 @@ class IndexManagerTest extends \Tests\TestCase
             ->andReturn(['acknowledged' => true])
             ->getMock();
 
-        $indexManager->setElasticsearchClient($client);                  
+        $indexManager->setElasticsearchClient($client);
 
         $result = $indexManager->create();
 
@@ -99,12 +98,12 @@ class IndexManagerTest extends \Tests\TestCase
 
         $indexManager = resolve(IndexManager::class);
 
-        $indexManager->setElasticsearchClient($client);                  
+        $indexManager->setElasticsearchClient($client);
 
         $result = $indexManager->create();
 
         $this->assertFalse($result);
-    }    
+    }
 
     /**
      * @test
@@ -126,7 +125,7 @@ class IndexManagerTest extends \Tests\TestCase
 
         $indexManager = resolve(IndexManager::class);
 
-        $indexManager->setElasticsearchClient($client);                  
+        $indexManager->setElasticsearchClient($client);
 
         $indexManager->create();
     }
@@ -147,7 +146,7 @@ class IndexManagerTest extends \Tests\TestCase
 
         $indexManager = resolve(IndexManager::class);
 
-        $indexManager->setElasticsearchClient($client);                 
+        $indexManager->setElasticsearchClient($client);
 
         $result = $indexManager->delete();
 
@@ -170,12 +169,12 @@ class IndexManagerTest extends \Tests\TestCase
 
         $indexManager = resolve(IndexManager::class);
 
-        $indexManager->setElasticsearchClient($client);                 
+        $indexManager->setElasticsearchClient($client);
 
         $result = $indexManager->delete();
 
         $this->assertFalse($result);
-    }    
+    }
 
     /**
      * @test
@@ -197,7 +196,7 @@ class IndexManagerTest extends \Tests\TestCase
 
         $indexManager = resolve(IndexManager::class);
 
-        $indexManager->setElasticsearchClient($client);            
+        $indexManager->setElasticsearchClient($client);
 
         $indexManager->delete();
     }
@@ -213,7 +212,7 @@ class IndexManagerTest extends \Tests\TestCase
             ->andReturn(Mockery::self())
             ->shouldReceive('exists')
             ->with([
-                'index' => IndexManager::getIndexName()
+                'index' => IndexManager::getIndexName(),
             ])
             ->andReturn(true)
             ->getMock();

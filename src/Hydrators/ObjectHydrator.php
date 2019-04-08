@@ -3,19 +3,18 @@
 namespace EthicalJobs\Elasticsearch\Hydrators;
 
 use ArrayObject;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use EthicalJobs\Elasticsearch\Contracts\Indexable;
 use EthicalJobs\Storage\Contracts\Hydrator;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 /**
  * Hydrates ArrayObjects from elasticsearch results
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 class ObjectHydrator implements Hydrator
-{   
+{
     /**
      * Indexable document type
      *
@@ -26,7 +25,7 @@ class ObjectHydrator implements Hydrator
     /**
      * {@inheritdoc}
      */
-    public function hydrateCollection(iterable $collection) : iterable
+    public function hydrateCollection(iterable $collection): iterable
     {
         if (empty($collection)) {
             return new Collection;
@@ -42,37 +41,6 @@ class ObjectHydrator implements Hydrator
 
         return new Collection($results);
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hydrateEntity($entity)
-    {
-        return new ArrayObject($entity, ArrayObject::ARRAY_AS_PROPS);
-    }
-
-    /**
-     * Set indexable instance
-     *
-     * @param Indexable $indexable
-     * @return Hydrator
-     */
-    public function setIndexable(Indexable $indexable): Hydrator
-    {    
-        $this->indexable = $indexable;
-
-        return $this;
-    }
-
-    /**
-     * Returns the indexable instance
-     * 
-     * @return Indexable
-     */
-    public function getIndexable(): Indexable
-    {    
-        return $this->indexable;
-    }        
 
     /**
      * Hydrates a elastic hit
@@ -93,16 +61,16 @@ class ObjectHydrator implements Hydrator
 
         foreach ($relations as $relation) {
             if (isset($hit[$relation]) && is_array($hit[$relation])) {
-                if (Arr::isAssoc($hit[$relation])) { 
+                if (Arr::isAssoc($hit[$relation])) {
                     // Is a single document relation
-                    $relationHits[$relation] =  $this->hydrateEntity($hit[$relation]);
-                } else { 
+                    $relationHits[$relation] = $this->hydrateEntity($hit[$relation]);
+                } else {
                     // Is collection of related documents
                     $relationHits[$relation] = new Collection;
                     foreach ($hit[$relation] as $relationHit) {
                         $relatedHit = $this->hydrateEntity($relationHit);
                         $relationHits[$relation]->put($relatedHit['id'], $relatedHit);
-                    }                    
+                    }
                 }
             }
         }
@@ -110,5 +78,36 @@ class ObjectHydrator implements Hydrator
         $hit = array_merge($hit, $relationHits);
 
         return $this->hydrateEntity($hit);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hydrateEntity($entity)
+    {
+        return new ArrayObject($entity, ArrayObject::ARRAY_AS_PROPS);
+    }
+
+    /**
+     * Returns the indexable instance
+     *
+     * @return Indexable
+     */
+    public function getIndexable(): Indexable
+    {
+        return $this->indexable;
+    }
+
+    /**
+     * Set indexable instance
+     *
+     * @param Indexable $indexable
+     * @return Hydrator
+     */
+    public function setIndexable(Indexable $indexable): Hydrator
+    {
+        $this->indexable = $indexable;
+
+        return $this;
     }
 }

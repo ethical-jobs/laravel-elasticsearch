@@ -2,6 +2,7 @@
 
 namespace Tests\Fixtures\Repositories;
 
+use EthicalJobs\Elasticsearch\Repository;
 use Tests\Fixtures\Models\Family;
 
 /**
@@ -9,8 +10,7 @@ use Tests\Fixtures\Models\Family;
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
-class FamilyRepository extends \EthicalJobs\Elasticsearch\Repository
+class FamilyRepository extends Repository
 {
     /**
      * Object constructor.

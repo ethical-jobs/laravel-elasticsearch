@@ -2,19 +2,18 @@
 
 namespace EthicalJobs\Elasticsearch\Indexing;
 
+use EthicalJobs\Elasticsearch\Contracts\HasElasticsearch;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
+use EthicalJobs\Elasticsearch\ElasticsearchClient;
+use EthicalJobs\Elasticsearch\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use EthicalJobs\Elasticsearch\Contracts\HasElasticsearch;
-use EthicalJobs\Elasticsearch\ElasticsearchClient;
-use EthicalJobs\Elasticsearch\Contracts\Indexable;
-use EthicalJobs\Elasticsearch\Utilities;
 
 /**
  * Indexes documents in elasticsearch
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 class Indexer implements HasElasticsearch
 {
     use ElasticsearchClient;
@@ -24,14 +23,14 @@ class Indexer implements HasElasticsearch
      *
      * @param bool
      */
-    private $synchronous = false;     
+    private $synchronous = false;
 
     /**
      * Enables "blocking" synchronous document indexing
      *
      * @return void
      */
-    public function synchronous() : void
+    public function synchronous(): void
     {
         $this->synchronous = true;
     }
@@ -45,11 +44,11 @@ class Indexer implements HasElasticsearch
     public function indexDocument(Indexable $indexable): array
     {
         return $this->getElasticsearchClient()->index([
-            'index'     => Utilities::config('index'),
-            'id'        => $indexable->getDocumentKey(),
-            'type'      => $indexable->getDocumentType(),
-            'refresh'   => $this->synchronous ? 'wait_for' : false,
-            'body'      => $indexable->getDocumentTree(),
+            'index' => Utilities::config('index'),
+            'id' => $indexable->getDocumentKey(),
+            'type' => $indexable->getDocumentType(),
+            'refresh' => $this->synchronous ? 'wait_for' : false,
+            'body' => $indexable->getDocumentTree(),
         ]);
     }
 
@@ -62,12 +61,12 @@ class Indexer implements HasElasticsearch
     public function deleteDocument(Indexable $indexable): array
     {
         return $this->getElasticsearchClient()->delete([
-            'index'     => Utilities::config('index'),
-            'id'        => $indexable->getDocumentKey(),
-            'type'      => $indexable->getDocumentType(),
-            'refresh'   => $this->synchronous ? 'wait_for' : false,
+            'index' => Utilities::config('index'),
+            'id' => $indexable->getDocumentKey(),
+            'type' => $indexable->getDocumentType(),
+            'refresh' => $this->synchronous ? 'wait_for' : false,
         ]);
-    }    
+    }
 
     /**
      * Indexes a collection of documents
@@ -75,7 +74,7 @@ class Indexer implements HasElasticsearch
      * @param Collection $collection
      * @return array
      */
-    public function indexCollection(Collection $collection) : array
+    public function indexCollection(Collection $collection): array
     {
         $params = [
             'refresh' => $this->synchronous ? 'wait_for' : false,
@@ -105,10 +104,10 @@ class Indexer implements HasElasticsearch
      * @param integer $chunks
      * @return void
      */
-    public function queue(Builder $query, int $chunks = 100) : void
+    public function queue(Builder $query, int $chunks = 100): void
     {
         $query->chunk($chunks, function ($documents) {
             IndexDocuments::dispatch($documents);
         });
-    } 
+    }
 }

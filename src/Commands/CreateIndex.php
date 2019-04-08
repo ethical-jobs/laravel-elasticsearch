@@ -3,14 +3,15 @@
 namespace EthicalJobs\Elasticsearch\Commands;
 
 use EthicalJobs\Elasticsearch\IndexManager;
+use Exception;
+use Illuminate\Console\Command;
 
 /**
  * Creates the default elasticsearch index
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
-class CreateIndex extends \Illuminate\Console\Command
+class CreateIndex extends Command
 {
     /**
      * The name and signature of the console command.
@@ -50,6 +51,7 @@ class CreateIndex extends \Illuminate\Console\Command
      * Execute the console command.
      *
      * @return mixed
+     * @throws Exception
      */
     public function handle()
     {
@@ -59,7 +61,7 @@ class CreateIndex extends \Illuminate\Console\Command
             $this->info('Index successfully created.');
         } else {
             $this->error('Index creation failed.');
-        }        
+        }
 
         return $response;
     }

@@ -4,22 +4,23 @@ namespace Tests\Integration\Indexing\Indexer;
 
 use EthicalJobs\Elasticsearch\Hydrators;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
-use Tests\Fixtures\Repositories\PersonRepository;
 use Tests\Fixtures\Models\Person;
+use Tests\Fixtures\Repositories\PersonRepository;
+use Tests\TestCase;
 
-class IndexingAndFinding extends \Tests\TestCase
-{   
+class IndexingAndFinding extends TestCase
+{
     /**
      * @test
      */
     public function it_can_index_documents_then_return_them()
     {
-        factory(Person::class, 4000)->create(); 
+        factory(Person::class, 4000)->create();
 
         $query = Person::query();
 
         $indexer = resolve(Indexer::class);
-         
+
         $indexer->synchronous();
 
         $indexer->queue($query, 500);
@@ -38,5 +39,5 @@ class IndexingAndFinding extends \Tests\TestCase
         foreach ($people as $person) {
             $this->assertInstanceOf(Person::class, $person);
         }
-    } 	    
+    }
 }

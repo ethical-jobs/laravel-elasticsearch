@@ -2,10 +2,12 @@
 
 namespace Tests\Integration;
 
-use Illuminate\Support\Facades\Event;
+use EthicalJobs\Elasticsearch\ServiceProvider;
 use EthicalJobs\Elasticsearch\Utilities;
+use Illuminate\Support\Facades\Event;
+use Tests\TestCase;
 
-class ServiceProviderTest extends \Tests\TestCase
+class ServiceProviderTest extends TestCase
 {
     /**
      * @test
@@ -17,8 +19,8 @@ class ServiceProviderTest extends \Tests\TestCase
         //
         $providers = $this->app->getLoadedProviders();
 
-        $this->assertTrue($providers[\EthicalJobs\Elasticsearch\ServiceProvider::class]);
-    }  
+        $this->assertTrue($providers[ServiceProvider::class]);
+    }
 
     /**
      * @test
@@ -33,7 +35,7 @@ class ServiceProviderTest extends \Tests\TestCase
             'mappings',
             'indexables',
         ]));
-    }                   
+    }
 
     /**
      * @test
@@ -50,5 +52,5 @@ class ServiceProviderTest extends \Tests\TestCase
             $this->assertEquals(1, count(Event::getListeners("eloquent.restored: $indexable")));
             $this->assertEquals(1, count(Event::getListeners("eloquent.deleted: $indexable")));
         }
-    }                 
+    }
 }

@@ -9,9 +9,9 @@ class OverFifity implements Criteria
 {
     public function apply(Repository $repository)
     {
-    	$repository
-    		->where('age', '>', 50);
+        $repository
+            ->where('age', '>', 50);
 
         return $this;
-    }     
+    }
 }

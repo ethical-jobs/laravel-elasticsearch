@@ -3,14 +3,14 @@
 namespace EthicalJobs\Elasticsearch\Commands;
 
 use EthicalJobs\Elasticsearch\IndexManager;
+use Illuminate\Console\Command;
 
 /**
  * Deletes the default elasticsearch index
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
-class DeleteIndex extends \Illuminate\Console\Command
+class DeleteIndex extends Command
 {
     /**
      * The name and signature of the console command.

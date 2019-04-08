@@ -2,6 +2,7 @@
 
 namespace Tests\Fixtures\Repositories;
 
+use EthicalJobs\Elasticsearch\Repository;
 use Tests\Fixtures\Models\Person;
 
 /**
@@ -9,8 +10,7 @@ use Tests\Fixtures\Models\Person;
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
-class PersonRepository extends \EthicalJobs\Elasticsearch\Repository
+class PersonRepository extends Repository
 {
     /**
      * Object constructor.

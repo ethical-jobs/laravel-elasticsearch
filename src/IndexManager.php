@@ -3,24 +3,56 @@
 namespace EthicalJobs\Elasticsearch;
 
 use EthicalJobs\Elasticsearch\Contracts\HasElasticsearch;
-use EthicalJobs\Elasticsearch\Utilities;
 
 /**
  * Elasticsearch index manager
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 class IndexManager implements HasElasticsearch
 {
     use ElasticsearchClient;
+
+    /**
+     * Create the index
+     *
+     * @return bool
+     */
+    public function create(): bool
+    {
+        if ($this->exists()) {
+            throw new \Exception('Index already exists.');
+        }
+
+        $response = $this->getElasticsearchClient()->indices()->create([
+            'index' => static::getIndexName(),
+            'body' => [
+                'settings' => Utilities::config('settings', []),
+                'mappings' => $this->getIndexMappings(),
+            ],
+        ]);
+
+        return isset($response['acknowledged']) ? $response['acknowledged'] === true : false;
+    }
+
+    /**
+     * Determine if the index exists
+     *
+     * @return bool
+     */
+    public function exists(): bool
+    {
+        return $this->getElasticsearchClient()->indices()->exists([
+            'index' => static::getIndexName(),
+        ]);
+    }
 
     /**
      * Returns the index name
      *
      * @return string
      */
-    public static function getIndexName() : string
+    public static function getIndexName(): string
     {
         return Utilities::config('index');
     }
@@ -30,7 +62,7 @@ class IndexManager implements HasElasticsearch
      *
      * @return array
      */
-    public function getIndexMappings() : array
+    public function getIndexMappings(): array
     {
         $mappings = [];
 
@@ -56,50 +88,16 @@ class IndexManager implements HasElasticsearch
     }
 
     /**
-     * Create the index
-     *
-     * @return bool
-     */
-    public function create() : bool
-    {
-        if ($this->exists()) {
-            throw new \Exception('Index already exists.');
-        }
-
-        $response = $this->getElasticsearchClient()->indices()->create([
-            'index' => static::getIndexName(),
-            'body'  => [
-                'settings'  => Utilities::config('settings', []),
-                'mappings'  => $this->getIndexMappings(),
-            ],
-        ]);
-
-        return isset($response['acknowledged']) ? $response['acknowledged'] === true : false;
-    }
-
-    /**
      * Delete the index
      *
      * @return bool
      */
-    public function delete() : bool
+    public function delete(): bool
     {
         $response = $this->getElasticsearchClient()->indices()->delete([
             'index' => static::getIndexName(),
         ]);
 
         return isset($response['acknowledged']) ? $response['acknowledged'] === true : false;
-    }
-
-    /**
-     * Determine if the index exists
-     *
-     * @return bool
-     */
-    public function exists() : bool
-    {
-        return $this->getElasticsearchClient()->indices()->exists([
-            'index' => static::getIndexName(),
-        ]);
     }
 }

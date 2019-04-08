@@ -2,15 +2,16 @@
 
 namespace Tests\Integration;
 
-use Mockery;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Log;
-use Tests\Fixtures\Models;
-use EthicalJobs\Elasticsearch\Utilities;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
 use EthicalJobs\Elasticsearch\Testing\IndexableObservers;
+use EthicalJobs\Elasticsearch\Utilities;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
+use Mockery;
+use Tests\Fixtures\Models;
+use Tests\TestCase;
 
-class IndexableObserverTest extends \Tests\TestCase
+class IndexableObserverTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -28,9 +29,10 @@ class IndexableObserverTest extends \Tests\TestCase
         $indexer = Mockery::mock(Indexer::class)
             ->shouldReceive('indexDocument')
             ->once()
-            ->withArgs(function($person) {
+            ->withArgs(function ($person) {
                 $this->assertEquals('Andrew', $person->first_name);
                 $this->assertEquals('McLagan', $person->last_name);
+
                 return true;
             })
             ->getMock();
@@ -38,10 +40,10 @@ class IndexableObserverTest extends \Tests\TestCase
         App::instance(Indexer::class, $indexer);
 
         factory(Models\Person::class)->create([
-            'first_name'    => 'Andrew',
-            'last_name'     => 'McLagan',
+            'first_name' => 'Andrew',
+            'last_name' => 'McLagan',
         ]);
-    } 
+    }
 
     /**
      * @test
@@ -56,26 +58,27 @@ class IndexableObserverTest extends \Tests\TestCase
             ->andReturn([])
             ->shouldReceive('indexDocument')
             ->once()
-            ->withArgs(function($person) {
+            ->withArgs(function ($person) {
                 $this->assertEquals('Werdna', $person->first_name);
                 $this->assertEquals('NagaLcM', $person->last_name);
+
                 return true;
             })
-            ->andReturn([])            
+            ->andReturn([])
             ->getMock();
 
         App::instance(Indexer::class, $indexer);
 
         factory(Models\Person::class)
             ->create([
-                'first_name'    => 'Andrew',
-                'last_name'     => 'McLagan',
+                'first_name' => 'Andrew',
+                'last_name' => 'McLagan',
             ])
             ->update([
-                'first_name'    => 'Werdna',
-                'last_name'     => 'NagaLcM',
+                'first_name' => 'Werdna',
+                'last_name' => 'NagaLcM',
             ]);
-    }     
+    }
 
     /**
      * @test
@@ -90,22 +93,23 @@ class IndexableObserverTest extends \Tests\TestCase
             ->andReturn([])
             ->shouldReceive('indexDocument')
             ->once()
-            ->withArgs(function($person) {
+            ->withArgs(function ($person) {
                 $this->assertFalse(is_null($person->deleted_at));
+
                 return true;
             })
-            ->andReturn([])            
+            ->andReturn([])
             ->getMock();
 
         App::instance(Indexer::class, $indexer);
 
         $person = factory(Models\Person::class)->create([
-            'first_name'    => 'Andrew',
-            'last_name'     => 'McLagan',
+            'first_name' => 'Andrew',
+            'last_name' => 'McLagan',
         ]);
 
         $person->delete();
-    }   
+    }
 
     /**
      * @test
@@ -120,11 +124,12 @@ class IndexableObserverTest extends \Tests\TestCase
             ->andReturn([])
             ->shouldReceive('deleteDocument')
             ->once()
-            ->withArgs(function($family) {
+            ->withArgs(function ($family) {
                 $this->assertEquals('McLagan', $family->surname);
+
                 return true;
             })
-            ->andReturn([])            
+            ->andReturn([])
             ->getMock();
 
         App::instance(Indexer::class, $indexer);
@@ -134,7 +139,7 @@ class IndexableObserverTest extends \Tests\TestCase
         ]);
 
         $family->delete();
-    }       
+    }
 
     /**
      * @test
@@ -149,11 +154,12 @@ class IndexableObserverTest extends \Tests\TestCase
             ->andReturn([])
             ->shouldReceive('deleteDocument')
             ->once()
-            ->withArgs(function($family) {
+            ->withArgs(function ($family) {
                 $this->assertEquals('Andrew', $family->first_name);
+
                 return true;
             })
-            ->andReturn([])            
+            ->andReturn([])
             ->getMock();
 
         App::instance(Indexer::class, $indexer);
@@ -165,7 +171,7 @@ class IndexableObserverTest extends \Tests\TestCase
         $this->assertTrue(Utilities::isSoftDeletable($person));
 
         $person->forceDelete();
-    }       
+    }
 
     /**
      * @test
@@ -176,25 +182,26 @@ class IndexableObserverTest extends \Tests\TestCase
         $indexer = Mockery::mock(Indexer::class)
             ->shouldReceive('indexDocument')
             ->times(3)
-            ->withArgs(function($person) {
+            ->withArgs(function ($person) {
                 $this->assertEquals('Andrew', $person->first_name);
                 $this->assertEquals('McLagan', $person->last_name);
+
                 return true;
             })
-            ->andReturn([])        
+            ->andReturn([])
             ->getMock();
 
         App::instance(Indexer::class, $indexer);
 
         $person = factory(Models\Person::class)->create([
-            'first_name'    => 'Andrew',
-            'last_name'     => 'McLagan',
+            'first_name' => 'Andrew',
+            'last_name' => 'McLagan',
         ]);
 
         $person->delete();
 
         $person->restore();
-    }     
+    }
 
     /**
      * @test
@@ -219,12 +226,12 @@ class IndexableObserverTest extends \Tests\TestCase
         $person = factory(Models\Person::class)->create();
 
         $person->update([
-            'first_name'    => 'Werdna',
-            'last_name'     => 'NagaLcM',
+            'first_name' => 'Werdna',
+            'last_name' => 'NagaLcM',
         ]);
 
         $person->delete();
 
         $person->restore();
-    }                        
+    }
 }

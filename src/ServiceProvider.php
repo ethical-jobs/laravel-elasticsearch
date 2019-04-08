@@ -2,16 +2,14 @@
 
 namespace EthicalJobs\Elasticsearch;
 
-use EthicalJobs\Elasticsearch\Indexing\IndexableObserver;
-use EthicalJobs\Elasticsearch\Utilities;
 use EthicalJobs\Elasticsearch\Commands;
+use EthicalJobs\Elasticsearch\Indexing\IndexableObserver;
 
 /**
  * Elasticsearch service provider
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
     /**
@@ -19,7 +17,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      *
      * @var string
      */
-    protected $configPath = __DIR__.'/../config/elasticsearch.php';  
+    protected $configPath = __DIR__ . '/../config/elasticsearch.php';
 
     /**
      * Perform post-registration booting of services.
@@ -29,7 +27,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     public function boot()
     {
         $this->publishes([
-            $this->configPath => config_path('elasticsearch.php')
+            $this->configPath => config_path('elasticsearch.php'),
         ], 'config');
 
         $this->bootObservers();
@@ -37,34 +35,24 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->bootCommands();
     }
 
-     /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register() : void
-    {
-        $this->mergeConfigFrom($this->configPath, 'elasticsearch');        
-    }         
-
     /**
      * Configure indexable observers
      *
      * @return void
      */
-    protected function bootObservers() : void
+    protected function bootObservers(): void
     {
         foreach (Utilities::getIndexables() as $indexable) {
             $indexable::observe(IndexableObserver::class);
         }
-    }        
+    }
 
     /**
      * Register console commands
      *
      * @return void
      */
-    protected function bootCommands() : void
+    protected function bootCommands(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -74,5 +62,15 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
                 Commands\IndexDocuments::class,
             ]);
         }
-    }        
+    }
+
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register(): void
+    {
+        $this->mergeConfigFrom($this->configPath, 'elasticsearch');
+    }
 }

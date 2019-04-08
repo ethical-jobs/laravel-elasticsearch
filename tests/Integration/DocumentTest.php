@@ -3,8 +3,9 @@
 namespace Tests\Integration;
 
 use EthicalJobs\Elasticsearch\Utilities;
+use Tests\TestCase;
 
-class DocumentTest extends \Tests\TestCase
+class DocumentTest extends TestCase
 {
     /**
      * @test
