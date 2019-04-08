@@ -2,13 +2,14 @@
 
 namespace Tests\Integration\Repositories;
 
-use Mockery;
 use Elasticsearch\Client;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
-use Tests\Fixtures\Repositories\PersonRepository;
+use Mockery;
 use Tests\Fixtures\Models;
+use Tests\Fixtures\Repositories\PersonRepository;
+use Tests\TestCase;
 
-class FindTest extends \Tests\TestCase
+class FindTest extends TestCase
 {
     /**
      * @test
@@ -20,19 +21,20 @@ class FindTest extends \Tests\TestCase
         $client = Mockery::mock(Client::class)
             ->shouldReceive('search')
             ->once()
-            ->withArgs(function($query) {
+            ->withArgs(function ($query) {
                 $this->assertEquals('test-index', $query['index']);
+
                 return true;
             })
             ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
+            ->getMock();
 
         $repository = resolve(PersonRepository::class);
 
         $repository->setStorageEngine($client);
 
-        $results = $repository->find();
-    }      
+        $repository->find();
+    }
 
     /**
      * @test
@@ -44,17 +46,18 @@ class FindTest extends \Tests\TestCase
         $client = Mockery::mock(Client::class)
             ->shouldReceive('search')
             ->once()
-            ->withArgs(function($query) {
+            ->withArgs(function ($query) {
                 $this->assertEquals('people', $query['type']);
+
                 return true;
             })
             ->andReturn(SearchResultsFactory::getSearchResults($people))
-            ->getMock();       
+            ->getMock();
 
         $repository = resolve(PersonRepository::class);
 
         $repository->setStorageEngine($client);
 
-        $results = $repository->find();
-    }                       
+        $repository->find();
+    }
 }

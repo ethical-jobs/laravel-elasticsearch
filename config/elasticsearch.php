@@ -9,18 +9,18 @@ return [
     |
     | Configure the conenction to elasticsearch service
     |
-    */    
+    */
 
     'default' => 'default',
-    
+
     'connections' => [
         'default' => [
-            'hosts'             => [ env('ES_HOST', 'localhost:9200') ],
-            'retries'           => 1,
-            'sslVerification'   => null,
-            'logging'           => false,
+            'hosts' => [env('ES_HOST', 'localhost:9200')],
+            'retries' => 1,
+            'sslVerification' => null,
+            'logging' => false,
         ],
-    ],    
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -31,8 +31,8 @@ return [
     | At present the package only supports a single index.
     |
     */
-   
-	'index'	=> env('ES_INDEX', 'my-index'),
+
+    'index' => env('ES_INDEX', 'my-index'),
 
     /*
     |--------------------------------------------------------------------------
@@ -42,11 +42,11 @@ return [
     | The index settings initialised at creation time
     |
     */
-   
-	'settings' => [
+
+    'settings' => [
         'index' => [
-            'number_of_shards' => 3, 
-            'number_of_replicas' => 2, 
+            'number_of_shards' => 3,
+            'number_of_replicas' => 2,
         ],
     ],
 
@@ -59,7 +59,7 @@ return [
     |
     */
 
-	'mappings'	=> [],
+    'mappings' => [],
 
     /*
     |--------------------------------------------------------------------------
@@ -68,9 +68,9 @@ return [
     |
     | An array of indexable models, must implment the Indexable interface
     |
-    */    
-   
-   'indexables' => [
+    */
+
+    'indexables' => [
         // App\User::class,
-   ],
+    ],
 ];

@@ -6,8 +6,9 @@ use Mockery;
 use Elasticsearch\Client;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
 use Tests\Fixtures\Models\Person;
+use Tests\TestCase;
 
-class IndexDocumentTest extends \Tests\TestCase
+class IndexDocumentTest extends TestCase
 {
     /**
      * @test

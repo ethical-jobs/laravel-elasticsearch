@@ -9,9 +9,9 @@ class Males implements Criteria
 {
     public function apply(Repository $repository)
     {
-    	$repository
-    		->where('sex', '=', 'male');
+        $repository
+            ->where('sex', '=', 'male');
 
         return $this;
-    }     
+    }
 }

@@ -2,25 +2,21 @@
 
 namespace EthicalJobs\Elasticsearch\Testing;
 
-use Mockery;
 use Illuminate\Support\Collection;
 use M6Web\Component\ElasticsearchMock\Client as MockClient;
-use EthicalJobs\Elasticsearch\Contracts\IndexableObserver;
-use EthicalJobs\Elasticsearch\Indexing\Indexer;
 
 /**
  * Mocks the elasticsearch results
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 class SearchResultsFactory
 {
     /**
      * Mocks results of an Elasicsearch "search" api call
      *
-     * @param Illuminate\Support\Collection $entities
-     * @return MockClient
+     * @param Collection $entities
+     * @return array
      */
     public static function getSearchResults(Collection $entities)
     {
@@ -37,12 +33,12 @@ class SearchResultsFactory
         );
 
         return $elasticClient->search();
-    } 
+    }
 
     /**
      * Mocks empty elasticsearch results
      *
-     * @return MockClient
+     * @return array
      */
     public static function getEmptySearchResults()
     {
@@ -51,5 +47,5 @@ class SearchResultsFactory
         $elasticClient->addSearchResult('test-index', 'mock_document_type', []);
 
         return $elasticClient->search();
-    }     
+    }
 }

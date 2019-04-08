@@ -2,9 +2,9 @@
 
 namespace Tests\Integration\Repositories;
 
-use Tests\Fixtures\RepositoryFactory;
+use Tests\TestCase;
 
-class UpdateCollectionTest extends \Tests\TestCase
+class UpdateCollectionTest extends TestCase
 {
     /**
      * @test
@@ -15,5 +15,5 @@ class UpdateCollectionTest extends \Tests\TestCase
         $this->expectException(\Exception::class);
 
         $repository->updateCollection([]);
-    }    
+    }
 }

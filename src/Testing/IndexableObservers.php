@@ -2,16 +2,15 @@
 
 namespace EthicalJobs\Elasticsearch\Testing;
 
-use Mockery;
 use EthicalJobs\Elasticsearch\Indexing\IndexableObserver;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
+use Mockery;
 
 /**
  * Mocks the elasticsearch client
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 trait IndexableObservers
 {
     /**
@@ -21,10 +20,10 @@ trait IndexableObservers
      */
     public static function withoutObservers(): void
     {
-        app()->bind(IndexableObserver::class, function(){
+        app()->bind(IndexableObserver::class, function () {
             return Mockery::mock(IndexableObserver::class)->shouldIgnoreMissing();
-        });  
-    }     
+        });
+    }
 
     /**
      * Enable ES indexable observer for testing purposes
@@ -33,8 +32,8 @@ trait IndexableObservers
      */
     public static function withObservers(): void
     {
-        app()->bind(IndexableObserver::class, function(){
+        app()->bind(IndexableObserver::class, function () {
             return new IndexableObserver(resolve(Indexer::class));
-        });  
-    }       
+        });
+    }
 }

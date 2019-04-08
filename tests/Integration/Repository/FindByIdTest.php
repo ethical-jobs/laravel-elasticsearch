@@ -3,11 +3,12 @@
 namespace Tests\Integration\Repositories;
 
 use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
+use Tests\Fixtures\Models;
 use Tests\Fixtures\Repositories\PersonRepository;
 use Tests\Helpers\Indexer;
-use Tests\Fixtures\Models;
+use Tests\TestCase;
 
-class FindByIdTest extends \Tests\TestCase
+class FindByIdTest extends TestCase
 {
     use ResetElasticsearchIndex;
 
@@ -19,14 +20,14 @@ class FindByIdTest extends \Tests\TestCase
         $donald = factory(Models\Person::class)->create([
             'first_name' => 'Donald',
             'last_name' => 'Trump',
-        ]);     
+        ]);
 
         $barak = factory(Models\Person::class)->create([
             'first_name' => 'Barak',
             'last_name' => 'Obama',
-        ]);        
+        ]);
 
-        Indexer::all(Models\Person::class);     
+        Indexer::all(Models\Person::class);
 
         $shouldBeDonald = resolve(PersonRepository::class)
             ->findById($donald->id);
@@ -42,6 +43,6 @@ class FindByIdTest extends \Tests\TestCase
         $this->assertEquals(
             $shouldBeBarak->first_name,
             $barak->first_name
-        );        
-    }          
+        );
+    }
 }

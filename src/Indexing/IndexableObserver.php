@@ -2,16 +2,16 @@
 
 namespace EthicalJobs\Elasticsearch\Indexing;
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Model;
 use EthicalJobs\Elasticsearch\Utilities;
+use Exception;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Updates elasticsearch from eloquent model events.
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 class IndexableObserver
 {
     /**
@@ -40,44 +40,7 @@ class IndexableObserver
      */
     public function created(Model $indexable)
     {
-        $this->indexDocument($indexable); 
-    }
-
-    /**
-     * Listens to the updated event
-     *
-     * @param Model $indexable
-     * @return void
-     */
-    public function updated(Model $indexable)
-    {
-        $this->indexDocument($indexable); 
-    }
-
-    /**
-     * Listen to the deleting event.
-     *
-     * @param Model $indexable
-     * @return void
-     */
-    public function deleted(Model $indexable)
-    {
-        if (Utilities::isSoftDeletable($indexable) && !$indexable->isForceDeleting()) {
-            $this->indexDocument($indexable); 
-        } else {
-            $this->deleteDocument($indexable);   
-        }
-    }
-
-    /**
-     * Listen to the restored event.
-     *
-     * @param Model $indexable
-     * @return void
-     */
-    public function restored(Model $indexable)
-    {
-        $this->indexDocument($indexable); 
+        $this->indexDocument($indexable);
     }
 
     /**
@@ -89,11 +52,37 @@ class IndexableObserver
     protected function indexDocument(Model $indexable)
     {
         try {
-            $this->indexer->indexDocument($indexable); 
-        } catch (\Exception $exception) {
-            Log::critical('ej:es:indexing:observer '.$exception->getMessage(), $indexable->toArray());
+            $this->indexer->indexDocument($indexable);
+        } catch (Exception $exception) {
+            Log::critical('ej:es:indexing:observer ' . $exception->getMessage(), $indexable->toArray());
         }
-    }    
+    }
+
+    /**
+     * Listens to the updated event
+     *
+     * @param Model $indexable
+     * @return void
+     */
+    public function updated(Model $indexable)
+    {
+        $this->indexDocument($indexable);
+    }
+
+    /**
+     * Listen to the deleting event.
+     *
+     * @param Model $indexable
+     * @return void
+     */
+    public function deleted(Model $indexable)
+    {
+        if (Utilities::isSoftDeletable($indexable) && !$indexable->isForceDeleting()) {
+            $this->indexDocument($indexable);
+        } else {
+            $this->deleteDocument($indexable);
+        }
+    }
 
     /**
      * Executes delete action. Swallow and log.
@@ -104,9 +93,20 @@ class IndexableObserver
     protected function deleteDocument(Model $indexable)
     {
         try {
-            $this->indexer->deleteDocument($indexable); 
-        } catch (\Exception $exception) {
-            Log::critical('ej:es:indexing:observer '.$exception->getMessage(), $indexable->toArray());
+            $this->indexer->deleteDocument($indexable);
+        } catch (Exception $exception) {
+            Log::critical('ej:es:indexing:observer ' . $exception->getMessage(), $indexable->toArray());
         }
-    }        
+    }
+
+    /**
+     * Listen to the restored event.
+     *
+     * @param Model $indexable
+     * @return void
+     */
+    public function restored(Model $indexable)
+    {
+        $this->indexDocument($indexable);
+    }
 }

@@ -2,17 +2,16 @@
 
 namespace Tests\Helpers;
 
-use Illuminate\Database\Eloquent\Collection;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
 use EthicalJobs\Elasticsearch\Indexing\Indexer as DocumentIndexer;
 use EthicalJobs\Elasticsearch\Utilities;
-use EthicalJobs\Elasticsearch\Indexable;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Document indexer helper
- * 
+ *
  * @auth Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 class Indexer
 {
     /**
@@ -21,7 +20,7 @@ class Indexer
      * @param Indexable $indexable
      * @return void
      */
-    public static function single(Indexable $indexable) : void
+    public static function single(Indexable $indexable): void
     {
         $indexer = resolve(DocumentIndexer::class);
 
@@ -36,29 +35,29 @@ class Indexer
      * @param Collection $documents
      * @return void
      */
-    public static function collection(Collection $documents) : void
+    public static function collection(Collection $documents): void
     {
         $indexer = resolve(DocumentIndexer::class);
 
         $indexer->synchronous();
 
         $indexer->indexCollection($documents);
-    }  
-    
+    }
+
     /**
      * Index all documents of an indexable
      *
      * @param string $indexable
      * @return void
      */
-    public static function all(string $indexable) : void
+    public static function all(string $indexable): void
     {
         $query = $indexable::query();
 
         if (Utilities::isSoftDeletable($indexable)) {
             $query->withTrashed();
-        }        
+        }
 
         static::collection($query->get());
-    }     
+    }
 }

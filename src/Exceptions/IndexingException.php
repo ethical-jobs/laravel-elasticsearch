@@ -2,4 +2,8 @@
 
 namespace EthicalJobs\Elasticsearch\Exceptions;
 
-class IndexingException extends \Exception { }
+use Exception;
+
+class IndexingException extends Exception
+{
+}

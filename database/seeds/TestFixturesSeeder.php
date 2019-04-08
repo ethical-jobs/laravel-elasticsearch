@@ -19,7 +19,7 @@ class TestFixturesSeeder extends Seeder
             factory(Models\Person::class, rand(2, 5))->create([
                 'family_id' => $family->id,
             ]);
-            
+
             factory(Models\Vehicle::class, rand(0, 3))->create([
                 'family_id' => $family->id,
             ]);

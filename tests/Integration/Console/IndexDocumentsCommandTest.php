@@ -2,18 +2,17 @@
 
 namespace Tests\Integration\Console;
 
-use Mockery;
-use Carbon\Carbon;
-use Elasticsearch\Client;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Artisan;
-use EthicalJobs\Elasticsearch\Exceptions\IndexingException;
 use EthicalJobs\Elasticsearch\Commands\IndexDocuments;
+use EthicalJobs\Elasticsearch\Exceptions\IndexingException;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
 use EthicalJobs\Elasticsearch\Utilities;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
+use Mockery;
 use Tests\Fixtures\Models;
+use Tests\TestCase;
 
-class IndexDocumentsCommandTest extends \Tests\TestCase
+class IndexDocumentsCommandTest extends TestCase
 {
     /**
      * @test
@@ -27,12 +26,12 @@ class IndexDocumentsCommandTest extends \Tests\TestCase
             ->times(count($indexables))
             ->withAnyArgs()
             ->andReturn(null)
-            ->getMock();         
+            ->getMock();
 
         $this->app->instance(Indexer::class, $indexer);
 
         Artisan::call('ej:es:index');
-    }   
+    }
 
     /**
      * @test
@@ -46,14 +45,14 @@ class IndexDocumentsCommandTest extends \Tests\TestCase
             ->once()
             ->withAnyArgs()
             ->andReturn(null)
-            ->getMock();         
+            ->getMock();
 
         $this->app->instance(Indexer::class, $indexer);
 
-        Artisan::call('ej:es:index', [          
-            '--indexables'   => Models\Family::class,
+        Artisan::call('ej:es:index', [
+            '--indexables' => Models\Family::class,
         ]);
-    }    
+    }
 
     /**
      * @test
@@ -68,14 +67,14 @@ class IndexDocumentsCommandTest extends \Tests\TestCase
             ->withArgs(function ($query) {
                 return $query->get()->toArray() === (new Models\Family)->getIndexingQuery()->get()->toArray();
             })
-            ->andReturn(null);         
+            ->andReturn(null);
 
         $this->app->instance(Indexer::class, $indexer->getMock());
 
-        Artisan::call('ej:es:index', [          
-            '--indexables'   => Models\Family::class,
+        Artisan::call('ej:es:index', [
+            '--indexables' => Models\Family::class,
         ]);
-    }        
+    }
 
     /**
      * @test
@@ -87,13 +86,13 @@ class IndexDocumentsCommandTest extends \Tests\TestCase
             ->withArgs(function ($query, $chunkSize) {
                 return $chunkSize === 250;
             })
-            ->andReturn(null);         
+            ->andReturn(null);
 
         $this->app->instance(Indexer::class, $indexer->getMock());
 
         Artisan::call('ej:es:index');
-    }       
-    
+    }
+
     /**
      * @test
      */
@@ -104,15 +103,15 @@ class IndexDocumentsCommandTest extends \Tests\TestCase
             ->withArgs(function ($query, $chunkSize) {
                 return $chunkSize === 1983;
             })
-            ->andReturn(null);         
+            ->andReturn(null);
 
         $this->app->instance(Indexer::class, $indexer->getMock());
 
         Artisan::call('ej:es:index', [
-            '--chunk-size'   => 1983,
+            '--chunk-size' => 1983,
         ]);
-    }     
-    
+    }
+
     /**
      * @test
      */
@@ -120,16 +119,16 @@ class IndexDocumentsCommandTest extends \Tests\TestCase
     {
         $this->expectException(IndexingException::class);
 
-        Cache::forever(IndexDocuments::$cacheLock, true); 
+        Cache::forever(IndexDocuments::$cacheLock, true);
 
         $indexer = Mockery::mock(Indexer::class)
             ->shouldReceive('queue')
-            ->never();   
+            ->never();
 
         $this->app->instance(Indexer::class, $indexer->getMock());
 
         Artisan::call('ej:es:index');
 
         Cache::forget(IndexDocuments::$cacheLock);
-    }      
+    }
 }

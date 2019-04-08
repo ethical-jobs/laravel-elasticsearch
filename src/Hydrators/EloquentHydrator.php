@@ -3,19 +3,19 @@
 namespace EthicalJobs\Elasticsearch\Hydrators;
 
 use Carbon\Carbon;
-use ReflectionMethod;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use EthicalJobs\Elasticsearch\Contracts\Indexable;
 use EthicalJobs\Storage\Contracts\Hydrator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use ReflectionException;
+use ReflectionMethod;
 
 /**
  * Hydrates eloquent models from elasticsearch results
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 class EloquentHydrator implements Hydrator
 {
     /**
@@ -34,7 +34,7 @@ class EloquentHydrator implements Hydrator
 
         $hits = $collection['hits']['hits'] ?? null;
 
-        if (! $hits || count($hits) < 1) {
+        if (!$hits || count($hits) < 1) {
             return $this->toCollection([]);
         }
 
@@ -46,6 +46,32 @@ class EloquentHydrator implements Hydrator
     }
 
     /**
+     * Converts array to collection
+     *
+     * @param array $entities
+     * @return Collection
+     */
+    protected function toCollection(array $entities)
+    {
+        return Collection::make($entities);
+    }
+
+    /**
+     * Hydrates an eloquent model from an array of attributes
+     *
+     * @param array $hit
+     * @return Model
+     */
+    protected function hydrateEntityRecursive(array $hit): Model
+    {
+        $instance = $this->hydrateEntity($hit);
+
+        $instance = $this->hydrateRelations($instance);
+
+        return $instance;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function hydrateEntity($entity)
@@ -54,49 +80,11 @@ class EloquentHydrator implements Hydrator
 
         $instance->isDocument = true;
 
-        $instance->documentScore = (int) $entity['_score'];        
+        $instance->documentScore = (int)$entity['_score'];
 
-        $instance->setRawAttributes((array) $entity['_source'], true);
+        $instance->setRawAttributes((array)$entity['_source'], true);
 
         $instance = $this->parseDateFields($instance);
-
-        return $instance;
-    }
-
-    /**
-     * Set indexable instance
-     *
-     * @param Indexable $indexable
-     * @return Hydrator
-     */
-    public function setIndexable(Indexable $indexable): Hydrator
-    {    
-        $this->indexable = $indexable;
-
-        return $this;
-    }
-
-    /**
-     * Returns the indexable instance
-     * 
-     * @return Indexable
-     */
-    public function getIndexable(): Indexable
-    {    
-        return $this->indexable;
-    }    
-
-    /**
-     * Hydrates an eloquent model from an array of attributes
-     *
-     * @param array $entity
-     * @return Model
-     */
-    protected function hydrateEntityRecursive(array $hit): Model
-    {
-        $instance = $this->hydrateEntity($hit);
-
-        $instance = $this->hydrateRelations($instance);
 
         return $instance;
     }
@@ -123,6 +111,7 @@ class EloquentHydrator implements Hydrator
      *
      * @param Model $entity
      * @return Model
+     * @throws ReflectionException
      */
     protected function hydrateRelations(Model $entity): Model
     {
@@ -133,7 +122,7 @@ class EloquentHydrator implements Hydrator
 
             if ($value) {
 
-                if (! in_array($attribute, $entity->getDocumentRelations())) {
+                if (!in_array($attribute, $entity->getDocumentRelations())) {
                     continue;
                 }
 
@@ -172,13 +161,25 @@ class EloquentHydrator implements Hydrator
     }
 
     /**
-     * Converts array to collection
+     * Returns the indexable instance
      *
-     * @param array $entities
-     * @return Collection
+     * @return Indexable
      */
-    protected function toCollection(array $entities)
+    public function getIndexable(): Indexable
     {
-        return Collection::make($entities);
+        return $this->indexable;
+    }
+
+    /**
+     * Set indexable instance
+     *
+     * @param Indexable $indexable
+     * @return Hydrator
+     */
+    public function setIndexable(Indexable $indexable): Hydrator
+    {
+        $this->indexable = $indexable;
+
+        return $this;
     }
 }

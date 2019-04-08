@@ -2,11 +2,12 @@
 
 namespace Tests\Integration\Console;
 
-use Mockery;
-use Illuminate\Support\Facades\Artisan;
 use EthicalJobs\Elasticsearch\IndexManager;
+use Illuminate\Support\Facades\Artisan;
+use Mockery;
+use Tests\TestCase;
 
-class DeleteIndexCommandTest extends \Tests\TestCase
+class DeleteIndexCommandTest extends TestCase
 {
     /**
      * @test
@@ -16,7 +17,7 @@ class DeleteIndexCommandTest extends \Tests\TestCase
         $index = Mockery::mock(IndexManager::class)
             ->shouldReceive('delete')
             ->once()
-            ->withNoArgs()     
+            ->withNoArgs()
             ->andReturn(true);
 
         $this->app->instance(IndexManager::class, $index->getMock());
