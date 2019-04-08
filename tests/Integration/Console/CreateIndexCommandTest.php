@@ -2,11 +2,12 @@
 
 namespace Tests\Integration\Console;
 
-use Mockery;
-use Illuminate\Support\Facades\Artisan;
 use EthicalJobs\Elasticsearch\IndexManager;
+use Illuminate\Support\Facades\Artisan;
+use Mockery;
+use Tests\TestCase;
 
-class CreateIndexCommandTest extends \Tests\TestCase
+class CreateIndexCommandTest extends TestCase
 {
     /**
      * @test
@@ -16,7 +17,7 @@ class CreateIndexCommandTest extends \Tests\TestCase
         $index = Mockery::mock(IndexManager::class)
             ->shouldReceive('create')
             ->once()
-            ->withNoArgs()     
+            ->withNoArgs()
             ->andReturn(true);
 
         $this->app->instance(IndexManager::class, $index->getMock());

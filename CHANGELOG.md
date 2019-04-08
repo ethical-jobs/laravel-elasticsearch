@@ -1,3 +1,7 @@
+# v2.1.6
+
+- Code cleanup and reinstate Drone CI/CD.
+
 # v2.1.3
 
 - Interface with incorrect namespace

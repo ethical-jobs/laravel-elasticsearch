@@ -3,11 +3,12 @@
 namespace Tests\Integration\Repositories;
 
 use EthicalJobs\Elasticsearch\Testing\ResetElasticsearchIndex;
+use Tests\Fixtures\Models;
 use Tests\Fixtures\Repositories\PersonRepository;
 use Tests\Helpers\Indexer;
-use Tests\Fixtures\Models;
+use Tests\TestCase;
 
-class LimitTest extends \Tests\TestCase
+class LimitTest extends TestCase
 {
     use ResetElasticsearchIndex;
 
@@ -16,17 +17,17 @@ class LimitTest extends \Tests\TestCase
      */
     public function it_can_limit_results()
     {
-        factory(Models\Person::class, 30)->create();      
+        factory(Models\Person::class, 30)->create();
 
-        Indexer::all(Models\Person::class);     
+        Indexer::all(Models\Person::class);
 
         $people = resolve(PersonRepository::class)
             ->limit(20)
             ->find();
 
-        $this->assertEquals(20, $people->count());           
-    } 
-    
+        $this->assertEquals(20, $people->count());
+    }
+
     /**
      * @test
      */
@@ -40,13 +41,13 @@ class LimitTest extends \Tests\TestCase
         // - setParams
         // - resetParams (resets search to defaults e.g limit and clears (see construct))
 
-        factory(Models\Person::class, 3000)->create();      
+        factory(Models\Person::class, 3000)->create();
 
-        Indexer::all(Models\Person::class);     
+        Indexer::all(Models\Person::class);
 
         $people = resolve(PersonRepository::class)
             ->find();
 
-        $this->assertEquals(3000, $people->count());           
-    }      
+        $this->assertEquals(3000, $people->count());
+    }
 }

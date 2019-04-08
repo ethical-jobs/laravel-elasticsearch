@@ -9,7 +9,6 @@ use EthicalJobs\Elasticsearch\IndexManager;
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 trait ResetElasticsearchIndex
 {
     /**
@@ -22,21 +21,21 @@ trait ResetElasticsearchIndex
         parent::setUp();
 
         $this->resetTestIndex();
-    }     
+    }
 
     /**
      * Resets the elasticsearch testing index
      *
      * @return void
      */
-    public function resetTestIndex() : void
+    public function resetTestIndex(): void
     {
         $index = resolve(IndexManager::class);
 
         if ($index->exists()) {
             $index->delete();
-        }   
-        
+        }
+
         $index->create();
-    }       
+    }
 }

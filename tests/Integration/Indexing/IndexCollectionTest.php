@@ -2,12 +2,13 @@
 
 namespace Tests\Integration\Indexing\Indexer;
 
-use Mockery;
 use Elasticsearch\Client;
 use EthicalJobs\Elasticsearch\Indexing\Indexer;
+use Mockery;
 use Tests\Fixtures\Models\Person;
+use Tests\TestCase;
 
-class IndexCollectionTest extends \Tests\TestCase
+class IndexCollectionTest extends TestCase
 {
     /**
      * @test
@@ -18,9 +19,9 @@ class IndexCollectionTest extends \Tests\TestCase
 
         $params = [
             'refresh' => false,
-            'body' => [],            
+            'body' => [],
         ];
-         
+
         foreach ($people as $person) {
             $params['body'][] = [
                 'index' => [
@@ -30,24 +31,24 @@ class IndexCollectionTest extends \Tests\TestCase
                 ],
             ];
             $params['body'][] = $person->getDocumentTree();
-        }    
+        }
 
- 		$client = Mockery::mock(Client::class)
- 			->shouldReceive('bulk')
- 			->once()
- 			->with($params)
- 			->andReturn(['hits' => 1])
- 			->getMock();
+        $client = Mockery::mock(Client::class)
+            ->shouldReceive('bulk')
+            ->once()
+            ->with($params)
+            ->andReturn(['hits' => 1])
+            ->getMock();
 
         $indexer = resolve(Indexer::class);
-		 
+
         $indexer->setElasticsearchClient($client);
 
- 		$response = $indexer->indexCollection($people);
+        $response = $indexer->indexCollection($people);
 
- 		$this->assertEquals(['hits' => 1], $response);
-    } 	   
-    
+        $this->assertEquals(['hits' => 1], $response);
+    }
+
     /**
      * @test
      */
@@ -55,21 +56,21 @@ class IndexCollectionTest extends \Tests\TestCase
     {
         $people = factory(Person::class, 25)->create();
 
- 		$client = Mockery::mock(Client::class)
- 			->shouldReceive('bulk')
- 			->once()
- 			->withArgs(function ($params) {
+        $client = Mockery::mock(Client::class)
+            ->shouldReceive('bulk')
+            ->once()
+            ->withArgs(function ($params) {
                 return $params['refresh'] === 'wait_for';
-             })
- 			->andReturn(['hits' => 1])
- 			->getMock();
+            })
+            ->andReturn(['hits' => 1])
+            ->getMock();
 
         $indexer = resolve(Indexer::class);
-		 
+
         $indexer->setElasticsearchClient($client);
-         
+
         $indexer->synchronous();
 
- 		$response = $indexer->indexCollection($people);
-    } 	    
+        $indexer->indexCollection($people);
+    }
 }

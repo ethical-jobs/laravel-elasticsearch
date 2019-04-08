@@ -2,6 +2,8 @@
 
 namespace Tests;
 
+use Exception;
+use Illuminate\Contracts\Foundation\Application;
 use Orchestra\Database\ConsoleServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use EthicalJobs\Elasticsearch\ServiceProvider;
@@ -12,10 +14,11 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 {
 	use RefreshDatabase;
 
-	/**
-	 * Setup the test environment.
+    /**
+     * Setup the test environment.
      *
      * @return void
+     * @throws Exception
      */
 	protected function setUp(): void
 	{
@@ -49,7 +52,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 	 * Inject package service provider
 	 * 
 	 * @param  Application $app
-	 * @return Array
+	 * @return array
 	 */
 	protected function getPackageProviders($app)
 	{
@@ -63,7 +66,7 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
 	 * Inject package facade aliases
 	 * 
 	 * @param  Application $app
-	 * @return Array
+	 * @return array
 	 */
 	protected function getPackageAliases($app)
 	{

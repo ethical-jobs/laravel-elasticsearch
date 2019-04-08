@@ -2,14 +2,15 @@
 
 namespace Tests\Integration\Hydrators;
 
-use Illuminate\Support\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Collection;
 use EthicalJobs\Elasticsearch\Hydrators\EloquentHydrator;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Tests\Fixtures\Models;
+use Tests\TestCase;
 
-class EloquentHydratorTest extends \Tests\TestCase
+class EloquentHydratorTest extends TestCase
 {
     /**
      * @test
@@ -30,11 +31,11 @@ class EloquentHydratorTest extends \Tests\TestCase
         $this->assertInstanceOf(Model::class, $hydrated);
 
         foreach ($toHydrate['_source'] as $property => $value) {
-            if (! $hydrated->$property instanceof Carbon) {
+            if (!$hydrated->$property instanceof Carbon) {
                 $this->assertEquals($hydrated->$property, $value);
             }
         }
-    }    
+    }
 
     /**
      * @test
@@ -141,15 +142,15 @@ class EloquentHydratorTest extends \Tests\TestCase
 
         // Check that document relations are built
         foreach ($collection as $family) {
-                // Vehicle
-                $this->assertInstanceOf(Models\Vehicle::class, $family->vehicle);
-                $this->assertTrue(isset($family->vehicle->id));
-                // Family members
-                $this->assertInstanceOf(Collection::class, $family->members);
-                $family->members->each(function ($person) {
-                    $this->assertInstanceOf(Models\Person::class, $person);
-                    $this->assertTrue(isset($person->id));
-                });
+            // Vehicle
+            $this->assertInstanceOf(Models\Vehicle::class, $family->vehicle);
+            $this->assertTrue(isset($family->vehicle->id));
+            // Family members
+            $this->assertInstanceOf(Collection::class, $family->members);
+            $family->members->each(function ($person) {
+                $this->assertInstanceOf(Models\Person::class, $person);
+                $this->assertTrue(isset($person->id));
+            });
         }
     }
 }

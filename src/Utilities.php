@@ -3,15 +3,30 @@
 namespace EthicalJobs\Elasticsearch;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Static utility class
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 class Utilities
 {
+    /**
+     * Returns response errors
+     *
+     * @param array $response
+     * @return array
+     */
+    public static function getResponseErrors(array $response): array
+    {
+        if (!static::isResponseValid($response)) {
+            return $response['items'];
+        }
+
+        return [];
+    }
+
     /**
      * Validates an Elasicsearch API response
      *
@@ -28,21 +43,6 @@ class Utilities
     }
 
     /**
-     * Returns response errors
-     *
-     * @param array $response
-     * @return array
-     */
-    public static function getResponseErrors(array $response): array
-    {
-        if (! static::isResponseValid($response)) {
-            return $response['items'];
-        }
-
-        return [];
-    }   
-
-    /**
      * Determine if model is soft deletable
      *
      * @param mixed $entity
@@ -51,10 +51,10 @@ class Utilities
     public static function isSoftDeletable($entity): bool
     {
         return in_array(
-            \Illuminate\Database\Eloquent\SoftDeletes::class, 
+            SoftDeletes::class,
             class_uses($entity)
         );
-    }    
+    }
 
     /**
      * Translates SQL like operators to ES dsl operators
@@ -72,19 +72,19 @@ class Utilities
             case '<':
                 return 'lt';
             case '>':
-                return 'gt';                                  
+                return 'gt';
         }
 
         return $operator;
-    }   
-    
+    }
+
     /**
      * Truth test if entity is indaxable
      *
      * @param Model $entity
      * @return bool
      */
-    public static function isIndexable(Model $entity) : bool
+    public static function isIndexable(Model $entity): bool
     {
         if (in_array(get_class($entity), static::getIndexables())) {
             return true;
@@ -98,10 +98,10 @@ class Utilities
      *
      * @return array
      */
-    public static function getIndexables() : array
+    public static function getIndexables(): array
     {
         return static::config('indexables', []);
-    }     
+    }
 
     /**
      * Returns config setting(s)
@@ -115,5 +115,5 @@ class Utilities
         $key = (empty($key) === true) ? '' : ".$key"; // Allow empty key
 
         return config("elasticsearch$key", $default);
-    }      
+    }
 }

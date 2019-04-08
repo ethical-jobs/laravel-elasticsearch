@@ -2,45 +2,40 @@
 
 namespace EthicalJobs\Elasticsearch;
 
-use Elasticsearch\Client;
-use Illuminate\Database\Eloquent\Model;
-use ONGR\ElasticsearchDSL\Search;
-use ONGR\ElasticsearchDSL\Sort\FieldSort;
-use ONGR\ElasticsearchDSL\Query\TermLevel;
+use EthicalJobs\Elasticsearch\Contracts\HasElasticsearch;
+use EthicalJobs\Elasticsearch\Contracts\Indexable;
+use EthicalJobs\Elasticsearch\Hydrators\ObjectHydrator;
+use EthicalJobs\Storage\Contracts;
+use EthicalJobs\Storage\CriteriaCollection;
+use EthicalJobs\Storage\HasCriteria;
+use EthicalJobs\Storage\HydratesResults;
 use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\FullText;
-use ONGR\ElasticsearchDSL\Query\Joining;
-use EthicalJobs\Storage\Contracts;
-use EthicalJobs\Storage\HasCriteria;
-use EthicalJobs\Storage\CriteriaCollection;
-use EthicalJobs\Storage\HydratesResults;
-use EthicalJobs\Elasticsearch\Contracts\Indexable;
-use EthicalJobs\Elasticsearch\Contracts\HasElasticsearch;
-use EthicalJobs\Elasticsearch\Hydrators\ObjectHydrator;
-use EthicalJobs\Elasticsearch\Utilities;
+use ONGR\ElasticsearchDSL\Query\TermLevel;
+use ONGR\ElasticsearchDSL\Search;
+use ONGR\ElasticsearchDSL\Sort\FieldSort;
 
 /**
  * Elasticsearch repository
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 class Repository implements HasElasticsearch, Contracts\Repository, Contracts\HasCriteria, Contracts\HydratesResults
 {
     use ElasticsearchClient, HasCriteria, HydratesResults;
-    
+
     /**
-     * Indexable model 
-     * 
+     * Indexable model
+     *
      * @var Indexable
-     */    
+     */
     protected $indexable;
-    
+
     /**
      * Elasticsearch query DSL
-     * 
+     *
      * @var Search
-     */    
+     */
     protected $search;
 
     /**
@@ -65,20 +60,30 @@ class Repository implements HasElasticsearch, Contracts\Repository, Contracts\Ha
     /**
      * {@inheritdoc}
      */
+    public function limit(int $limit): Contracts\Repository
+    {
+        $this->search->setSize($limit);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getStorageEngine()
-    {    
+    {
         return $this->getElasticSearchClient();
-    }     
+    }
 
     /**
      * {@inheritdoc}
      */
     public function setStorageEngine($storage)
-    {    
+    {
         $this->setElasticsearchClient($storage);
 
         return $this;
-    }        
+    }
 
     /**
      * {@inheritdoc}
@@ -87,10 +92,10 @@ class Repository implements HasElasticsearch, Contracts\Repository, Contracts\Ha
     {
         $query = new TermLevel\TermQuery('id', $id);
 
-        $this->search->addQuery($query, BoolQuery::FILTER);        
+        $this->search->addQuery($query, BoolQuery::FILTER);
 
         return $this->limit(1)->find()->first();
-    }  
+    }
 
     /**
      * {@inheritdoc}
@@ -99,15 +104,15 @@ class Repository implements HasElasticsearch, Contracts\Repository, Contracts\Ha
     {
         $query = new TermLevel\TermQuery($field, $value);
 
-        $this->search->addQuery($query);        
+        $this->search->addQuery($query);
 
         return $this->limit(1)->find()->first();
-    }     
+    }
 
     /**
      * {@inheritdoc}
      */
-    public function where(string $field, $operator, $value = null) : Contracts\Repository
+    public function where(string $field, $operator, $value = null): Contracts\Repository
     {
         $operator = Utilities::translateOperator($operator);
 
@@ -123,35 +128,23 @@ class Repository implements HasElasticsearch, Contracts\Repository, Contracts\Ha
                 $query = new FullText\QueryStringQuery(str_replace('%', '*', $value));
                 $query->addParameter('default_field', $field);
                 $bool = null;
-                break;    
+                break;
             case '!=':
                 $query = new TermLevel\TermQuery($field, $value);
                 $bool = BoolQuery::MUST_NOT;
-                break; 
+                break;
             case '=':
             default:
                 $query = new TermLevel\TermQuery($field, $value ? $value : $operator);
                 $bool = BoolQuery::FILTER;
-                break;                                             
+                break;
         }
 
         if ($bool) {
-            $this->search->addQuery($query, $bool); 
+            $this->search->addQuery($query, $bool);
         } else {
-            $this->search->addQuery($query); 
+            $this->search->addQuery($query);
         }
-
-        return $this;
-    }  
-
-    /**
-     * {@inheritdoc}
-     */
-    public function whereIn(string $field, array $values) : Contracts\Repository
-    {
-        $query = new TermLevel\TermsQuery($field, $values);
-
-        $this->search->addQuery($query, BoolQuery::FILTER);        
 
         return $this;
     }
@@ -159,43 +152,45 @@ class Repository implements HasElasticsearch, Contracts\Repository, Contracts\Ha
     /**
      * {@inheritdoc}
      */
-    public function whereHasIn(string $field, array $values) : Contracts\Repository
-    {  
+    public function whereIn(string $field, array $values): Contracts\Repository
+    {
+        $query = new TermLevel\TermsQuery($field, $values);
+
+        $this->search->addQuery($query, BoolQuery::FILTER);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function whereHasIn(string $field, array $values): Contracts\Repository
+    {
         $fields = explode('.', $field);
 
         $query = new TermLevel\TermsQuery($field, $values);
 
-        $this->search->addQuery($query, BoolQuery::FILTER);  
-        
+        $this->search->addQuery($query, BoolQuery::FILTER);
+
         return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function orderBy(string $field, $direction = 'asc') : Contracts\Repository
+    public function orderBy(string $field, string $direction = 'asc'): Contracts\Repository
     {
         $this->search->addSort(new FieldSort($field, $direction));
 
-        $this->search->addSort(new FieldSort('_score', $direction));  
+        $this->search->addSort(new FieldSort('_score', $direction));
 
         return $this;
-    }               
+    }
 
     /**
      * {@inheritdoc}
      */
-    public function limit(int $limit) : Contracts\Repository
-    {
-        $this->search->setSize($limit);
-
-        return $this;
-    }    
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function search(string $term = '') : Contracts\Repository
+    public function search(string $term = ''): Contracts\Repository
     {
         $query = new FullText\SimpleQueryStringQuery($term, [
             'fields' => ['_all'],
@@ -205,12 +200,12 @@ class Repository implements HasElasticsearch, Contracts\Repository, Contracts\Ha
         $this->search->addQuery($query);
 
         return $this;
-    }        
+    }
 
     /**
      * {@inheritdoc}
      */
-    public function find() : iterable
+    public function find(): iterable
     {
         // dd($this->search->toArray());
 
@@ -218,10 +213,10 @@ class Repository implements HasElasticsearch, Contracts\Repository, Contracts\Ha
 
         $response = $this->getElasticsearchClient()->search([
             'index' => Utilities::config('index'),
-            'type'  => $this->indexable->getDocumentType(),
-            'body'  => $this->search->toArray(),
+            'type' => $this->indexable->getDocumentType(),
+            'body' => $this->search->toArray(),
         ]);
-        
+
         return $this->getHydrator()
             ->setIndexable($this->indexable)
             ->hydrateCollection($response);
@@ -233,7 +228,7 @@ class Repository implements HasElasticsearch, Contracts\Repository, Contracts\Ha
     public function update($id, array $attributes)
     {
         throw new \Exception('Use EthicalJobs\Elasticsearch\Indexing\Indexer service.');
-    }        
+    }
 
     /**
      * {@inheritdoc}
@@ -249,5 +244,5 @@ class Repository implements HasElasticsearch, Contracts\Repository, Contracts\Ha
     public function delete($id)
     {
         throw new \Exception('Use EthicalJobs\Elasticsearch\Indexing\Indexer service.');
-    }       
+    }
 }

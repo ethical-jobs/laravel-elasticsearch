@@ -7,8 +7,9 @@ use Tests\Fixtures\Models;
 use Illuminate\Support\Collection;
 use EthicalJobs\Elasticsearch\Hydrators\ObjectHydrator;
 use EthicalJobs\Elasticsearch\Testing\SearchResultsFactory;
+use Tests\TestCase;
 
-class ObjectHydratorTest extends \Tests\TestCase
+class ObjectHydratorTest extends TestCase
 {
     /**
      * @test
@@ -47,7 +48,7 @@ class ObjectHydratorTest extends \Tests\TestCase
             ->setIndexable(new Models\Vehicle)
             ->hydrateCollection($response);
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $collection);
+        $this->assertInstanceOf(Collection::class, $collection);
 
         $collection->each(function ($entity) {
             $this->assertInstanceOf(ArrayObject::class, $entity);
@@ -105,7 +106,7 @@ class ObjectHydratorTest extends \Tests\TestCase
             ->setIndexable(new Models\Vehicle)
             ->hydrateCollection($response);
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $collection);
+        $this->assertInstanceOf(Collection::class, $collection);
 
         $this->assertEquals(0, $collection->count());
     }
@@ -116,8 +117,6 @@ class ObjectHydratorTest extends \Tests\TestCase
      */
     public function it_builds_document_relations()
     {
-        $expectedRelations = ['members', 'vehicle'];
-
         $documentRelations = (new Models\Family)->getDocumentRelations();
 
         $families = factory(Models\Family::class, 3)

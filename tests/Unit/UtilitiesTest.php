@@ -2,11 +2,11 @@
 
 namespace Tests\Unit;
 
-use Illuminate\Database\Eloquent\Model;
 use EthicalJobs\Elasticsearch\Utilities;
 use Tests\Fixtures\Models;
+use Tests\TestCase;
 
-class UtilitiesTest extends \Tests\TestCase
+class UtilitiesTest extends TestCase
 {
     /**
      * @test
@@ -25,8 +25,8 @@ class UtilitiesTest extends \Tests\TestCase
     public function it_returns_original_operator_when_unable_to_translate()
     {
         $this->assertEquals('like', Utilities::translateOperator('like'));
-    }  
-    
+    }
+
     /**
      * @test
      */
@@ -38,9 +38,9 @@ class UtilitiesTest extends \Tests\TestCase
 
         $this->assertFalse(
             Utilities::isSoftDeletable(Models\Family::class)
-        );        
-    }     
-    
+        );
+    }
+
     /**
      * @test
      */
@@ -49,7 +49,7 @@ class UtilitiesTest extends \Tests\TestCase
         $this->assertTrue(
             Utilities::isIndexable(new Models\Person)
         );
-    }       
+    }
 
     /**
      * @test
@@ -60,18 +60,18 @@ class UtilitiesTest extends \Tests\TestCase
             Models\Person::class,
             Models\Family::class,
             Models\Vehicle::class,
-        ]);  
-    }        
+        ]);
+    }
 
     /**
      * @test
      */
     public function it_can_return_config_values()
     {
-        $this->assertEquals(Utilities::config('index'), 'test-index');  
+        $this->assertEquals(Utilities::config('index'), 'test-index');
 
-        $this->assertEquals(Utilities::config('ninjas.are.cool', ['default','foo']), ['default','foo']);  
+        $this->assertEquals(Utilities::config('ninjas.are.cool', ['default', 'foo']), ['default', 'foo']);
 
-        $this->assertEquals(Utilities::config(), config('elasticsearch'));  
-    }         
+        $this->assertEquals(Utilities::config(), config('elasticsearch'));
+    }
 }

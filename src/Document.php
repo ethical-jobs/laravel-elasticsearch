@@ -2,17 +2,15 @@
 
 namespace EthicalJobs\Elasticsearch;
 
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
-use Illuminate\Database\Eloquent\Builder;
 use EthicalJobs\Elasticsearch\Contracts\Indexable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 /**
  * Indexable trait for eloquent models
  *
  * @author Andrew McLagan <andrew@ethicaljobs.com.au>
  */
-
 trait Document
 {
     /**
@@ -40,7 +38,7 @@ trait Document
     /**
      * {@inheritdoc}
      */
-    public function getDocumentType() : string
+    public function getDocumentType(): string
     {
         return $this->getTable();
     }
@@ -48,23 +46,7 @@ trait Document
     /**
      * {@inheritdoc}
      */
-    public function getDocumentBody() : array
-    {
-        return $this->attributesToArray();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getDocumentMappings() : array
-    {
-        return [];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getDocumentRelations() : array
+    public function getDocumentMappings(): array
     {
         return [];
     }
@@ -83,9 +65,40 @@ trait Document
     }
 
     /**
+     * Is attribute an indexable relation
+     *
+     * @param string $attribute
+     * @return bool
+     */
+    public function isIndexableRelation($attribute): bool
+    {
+        if (!in_array($attribute, $this->getDocumentRelations())) {
+            return false;
+        }
+
+        if (!method_exists($this, $attribute)) {
+            return false;
+        }
+
+        if (!Utilities::isIndexable($this->$attribute()->getModel())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function getIndexingQuery() : Builder
+    public function getDocumentRelations(): array
+    {
+        return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIndexingQuery(): Builder
     {
         $query = $this
             ->with($this->getDocumentRelations())
@@ -95,30 +108,7 @@ trait Document
             $query->withTrashed();
         }
 
-        return $query;    
-    }           
-
-    /**
-     * Is attribute an indexable relation
-     *
-     * @param string $attribute
-     * @return bool
-     */
-    public function isIndexableRelation($attribute) : bool
-    {
-        if (! in_array($attribute, $this->getDocumentRelations())) {
-            return false;
-        }
-
-        if (! method_exists($this, $attribute)) {
-            return false;
-        }
-
-        if (! Utilities::isIndexable($this->$attribute()->getModel())) {
-            return false;
-        }
-
-        return true;
+        return $query;
     }
 
     /**
@@ -126,7 +116,7 @@ trait Document
      *
      * @return array
      */
-    public function getDocumentTree() : array
+    public function getDocumentTree(): array
     {
         $body = $this->getDocumentBody();
 
@@ -145,19 +135,33 @@ trait Document
                         $body[$relationKey] = $this->$relationKey->map(function ($indexable) {
                             return $indexable->getDocumentBody();
                         })->toArray();
-                    } else if ($this->$relationKey instanceof Indexable) {
-                        $body[$relationKey] = $this->$relationKey->getDocumentBody();
+                    } else {
+                        if ($this->$relationKey instanceof Indexable) {
+                            $body[$relationKey] = $this->$relationKey->getDocumentBody();
+                        }
                     }
-                } else if ($this->relationLoaded($relationKey)) {
-                    if (method_exists($this->$relationKey, 'attributesToArray')) {
-                        $body[$relationKey] = $this->$relationKey->attributesToArray();
-                    } else if (method_exists($this->$relationKey, 'toArray')) {
-                        $body[$relationKey] = $this->$relationKey->toArray();
+                } else {
+                    if ($this->relationLoaded($relationKey)) {
+                        if (method_exists($this->$relationKey, 'attributesToArray')) {
+                            $body[$relationKey] = $this->$relationKey->attributesToArray();
+                        } else {
+                            if (method_exists($this->$relationKey, 'toArray')) {
+                                $body[$relationKey] = $this->$relationKey->toArray();
+                            }
+                        }
                     }
                 }
             }
         }
 
         return $body;
-    } 
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDocumentBody(): array
+    {
+        return $this->attributesToArray();
+    }
 }
